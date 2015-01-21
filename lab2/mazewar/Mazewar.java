@@ -224,6 +224,10 @@ public class Mazewar extends JFrame {
         public static void main(String args[]) {
 
                 /* Create the GUI */
+        		System.out.println("Launching server");
+        		
+        		new MazewarServer();
+        		
                 new Mazewar();
         }
 }
