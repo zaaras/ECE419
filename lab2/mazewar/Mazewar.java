@@ -23,9 +23,13 @@ import javax.swing.JTextPane;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.JOptionPane;
+
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
+
 import javax.swing.BorderFactory;
+
+import java.io.IOException;
 import java.io.Serializable;
 
 /**
@@ -63,6 +67,7 @@ public class Mazewar extends JFrame {
          * The {@link GUIClient} for the game.
          */
         private GUIClient guiClient = null;
+        private RemoteClient remoteClient = null;
 
         /**
          * The panel that displays the {@link Maze}.
@@ -119,6 +124,9 @@ public class Mazewar extends JFrame {
         /** 
          * The place where all the pieces are put together. 
          */
+        
+        private MazewarClient clientConnection = null; 
+        
         public Mazewar() {
                 super("ECE419 Mazewar");
                 consolePrintLn("ECE419 Mazewar started!");
@@ -141,12 +149,29 @@ public class Mazewar extends JFrame {
                 
                 // You may want to put your network initialization code somewhere in
                 // here.
+                String[] args = new String[2];
+                args[0] = "localhost";
+                args[1] = "4444";
+               
+                try {
+                	clientConnection = new MazewarClient(args, name);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					assert(false);
+				}
+                assert(clientConnection!=null);
+                
+                remoteClient = new RemoteClient(name,clientConnection);
+                maze.addClient(remoteClient);
+                this.addKeyListener(remoteClient);
                 
                 // Create the GUIClient and connect it to the KeyListener queue
-                guiClient = new GUIClient(name);
-                maze.addClient(guiClient);
-                this.addKeyListener(guiClient);
                 
+                //guiClient = new GUIClient(name);
+                //maze.addClient(guiClient);
+                //this.addKeyListener(guiClient);
+ 
                 // Use braces to force constructors not to be called at the beginning of the
                 // constructor.
                 {
@@ -158,7 +183,7 @@ public class Mazewar extends JFrame {
 
                 
                 // Create the panel that will display the maze.
-                overheadPanel = new OverheadMazePanel(maze, guiClient);
+                overheadPanel = new OverheadMazePanel(maze, remoteClient);
                 assert(overheadPanel != null);
                 maze.addMazeListener(overheadPanel);
                 
@@ -214,6 +239,19 @@ public class Mazewar extends JFrame {
                 setVisible(true);
                 overheadPanel.repaint();
                 this.requestFocusInWindow();
+                
+                while(true){
+                	try {
+						EchoPacket fromServer = (EchoPacket)clientConnection.in.readObject();
+						System.out.println(fromServer.message);
+						
+						remoteClient.update(fromServer.message);
+						
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+                }
         }
 
         
@@ -224,10 +262,7 @@ public class Mazewar extends JFrame {
         public static void main(String args[]) {
 
                 /* Create the GUI */
-        		System.out.println("Launching server");
-        		
-        		new MazewarServer();
-        		
                 new Mazewar();
+                
         }
 }

@@ -22,6 +22,12 @@ public class EchoServerHandlerThread extends Thread {
 			/* stream to write back to client */
 			ObjectOutputStream toClient = new ObjectOutputStream(socket.getOutputStream());
 			
+			
+			EchoPacket pacToClient;
+			pacToClient = new EchoPacket();
+			pacToClient.type = EchoPacket.ECHO_REQUEST;
+			pacToClient.message = "helloooo!";
+			toClient.writeObject(pacToClient);
 
 			while (( packetFromClient = (EchoPacket) fromClient.readObject()) != null) {
 				/* create a packet to send reply back to client */
