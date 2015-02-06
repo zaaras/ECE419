@@ -48,7 +48,6 @@ public class RemoteClient extends Client implements KeyListener {
 		name = nameIn;
 	}
 
-	@Override
 	public void keyPressed(KeyEvent e) {
 		// If the user pressed Q, invoke the cleanup code and quit.
 		if ((e.getKeyChar() == 'q') || (e.getKeyChar() == 'Q')) {
@@ -71,13 +70,11 @@ public class RemoteClient extends Client implements KeyListener {
 		}
 	}
 
-	@Override
 	public void keyReleased(KeyEvent arg0) {
 		// TODO Auto-generated method stub
 
 	}
 
-	@Override
 	public void keyTyped(KeyEvent arg0) {
 		// TODO Auto-generated method stub
 
