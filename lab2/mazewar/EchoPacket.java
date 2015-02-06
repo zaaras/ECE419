@@ -9,9 +9,16 @@ public class EchoPacket implements Serializable {
 	public static final int ECHO_BYE     = 300;
 	
 	/* the packet payload */
-	
 	/* initialized to be a null packet */
 	public int type = ECHO_NULL;
+	
+	public static final int UP = 1;	
+	public static final int DOWN = 2;
+	public static final int RIGHT = 3;
+	public static final int LEFT = 4;
+
+	int event;
+	int player;
 	
 	/* send your message here */
 	public String message;
