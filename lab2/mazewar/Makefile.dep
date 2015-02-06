@@ -1,3 +1,5 @@
+MazewarServer.class : MazewarServer.java
+MazewarServerHandlerThread.class : MazewarServerHandlerThread.java
 Cell.class : Cell.java
 Cell.class : Direction.java
 Cell.class : Direction.class
