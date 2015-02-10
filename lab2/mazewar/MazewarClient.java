@@ -36,8 +36,8 @@ public class MazewarClient {
 			System.exit(1);
 			
 		}
-		
-		SendMsg("Connected: " + name, name);
+		SendInit(name);
+		//SendMsg("Connected: " + name, name);
 
 	}
 
@@ -46,6 +46,14 @@ public class MazewarClient {
 		packetToServer.type = EchoPacket.ECHO_REQUEST;
 		packetToServer.player = name;
 		packetToServer.event = event ;
+		out.writeObject(packetToServer);
+	}
+	
+	public void SendInit(String name) throws IOException{
+		EchoPacket packetToServer = new EchoPacket();
+		packetToServer.type = EchoPacket.ECHO_NEW;
+		packetToServer.player = name;
+		packetToServer.event = EchoPacket.CONN;
 		out.writeObject(packetToServer);
 	}
 	

@@ -23,7 +23,7 @@ public class MazewarBcastThread extends Thread {
 		}
 	}
 	
-	public void broadcast(){
+	public synchronized void broadcast(){
 
 		
 		Connection con;

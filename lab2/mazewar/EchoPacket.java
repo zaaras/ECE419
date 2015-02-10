@@ -10,6 +10,7 @@ public class EchoPacket implements Serializable {
 	public static final int ECHO_NULL    = 0;
 	public static final int ECHO_REQUEST = 100;
 	public static final int ECHO_MISSING = 101;
+	public static final int ECHO_NEW = 102;
 	public static final int ECHO_REPLY   = 200;
 	public static final int ECHO_BYE     = 300;
 	
@@ -22,6 +23,9 @@ public class EchoPacket implements Serializable {
 	public static final int RIGHT = 3;
 	public static final int LEFT = 4;
 	public static final int FIRE = 5;
+	public static final int CONN = 6;
+	public static final int DIS = 7;
+	
 
 	int event;
 	String player;

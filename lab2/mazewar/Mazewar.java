@@ -239,7 +239,7 @@ public class Mazewar extends JFrame {
                 while(true){
                 	try {
 						EchoPacket fromServer = (EchoPacket)clientConnection.in.readObject();
-						System.out.println(fromServer.event);
+						System.out.println(fromServer.player + " " + fromServer.event);
 						
 						remoteClient.update(fromServer);
 					} catch (Exception e) {

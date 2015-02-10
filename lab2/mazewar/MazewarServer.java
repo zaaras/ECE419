@@ -11,6 +11,7 @@ public class MazewarServer {
 	public static LinkedBlockingQueue<EchoPacket> queue = new LinkedBlockingQueue<EchoPacket>();
 	public static ArrayList<Connection> clients = new ArrayList<Connection>();
 	public static MazewarBcastThread bt;
+	public static int clientCount = 0;
 
 	public static void main(String[] args) throws IOException {
 		ServerSocket serverSocket = null;
@@ -41,6 +42,8 @@ public class MazewarServer {
 			con.fromClient = new ObjectInputStream(con.client.getInputStream());
 			
 			clients.add(con);
+			clientCount++;
+			
 			
 			new MazewarServerHandlerThread(con).start();
 			// new MazewarServerHandlerThread(queue).start();
