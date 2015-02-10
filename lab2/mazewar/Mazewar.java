@@ -246,8 +246,7 @@ public class Mazewar extends JFrame {
 						EchoPacket fromServer = (EchoPacket)clientConnection.in.readObject();
 						System.out.println(fromServer.message);
 						
-						remoteClient.update(fromServer.message);
-						
+						remoteClient.update(fromServer);
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
