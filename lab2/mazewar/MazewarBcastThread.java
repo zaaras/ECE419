@@ -1,7 +1,4 @@
-import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.net.Socket;
-import java.util.Iterator;
 
 
 public class MazewarBcastThread extends Thread {
@@ -9,14 +6,15 @@ public class MazewarBcastThread extends Thread {
 	public void run(){
 		while(true){			
 			if(!MazewarServer.queue.isEmpty()){
-				System.out.println("queue not empty");
+				//System.out.println("queue not empty");
+				//System.out.println(MazewarServer.queue.peek().message);
 				broadcast();
 			}else{
-				System.out.println("queue empty");
+				//System.out.println("queue empty");
 			}
 			
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(10);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -26,27 +24,31 @@ public class MazewarBcastThread extends Thread {
 	}
 	
 	public void broadcast(){
-	
-		System.out.print("in broadcast");
+
 		
 		Connection con;
 	    ObjectOutputStream toClient;	    
 	    EchoPacket p;    
-	    		
-		for(int i = 0; i< MazewarServer.clients.size();i++){
-				con = MazewarServer.clients.get(i);
-				toClient = con.toClient;
-				try {
-					toClient.writeObject(MazewarServer.queue.take());
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}		
-			
-		}
+	    
+	    p = MazewarServer.queue.poll();	    
+	    
+	    //System.out.println(MazewarServer.queue.toString());
+	    
+	    if(p!=null){
+		    System.out.println(p.player + " " + p.event);
+		    
+			for(int i = 0; i< MazewarServer.clients.size();i++){
+					con = MazewarServer.clients.get(i);
+					toClient = con.toClient;
+					try {
+						toClient.writeObject(p);
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}		
+				
+			}
+	    }
 	}
 
 }

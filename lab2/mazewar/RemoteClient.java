@@ -94,17 +94,18 @@ public class RemoteClient extends Client implements KeyListener {
 
 	public void update(EchoPacket message) {
 		
-		LinkedList<Integer> missingPackets ;
-		Iterator<Integer> packetid;
+		//LinkedList<Integer> missingPackets ;
+		//Iterator<Integer> packetid;
 		
 		que.add(message);
-		missingPackets = validateQue();
+		/*missingPackets = validateQue();
 		
 		if(missingPackets.size()!=0){
 			// some packets dropped, request from server
 			packetid = missingPackets.iterator();
 			while(packetid.hasNext()){
-				requestPacket(packetid.next());
+				System.out.println("missing packets");
+				//requestPacket(packetid.next());
 			}
 		}else{
 			/*if(message.contains("mov:")){
@@ -126,8 +127,8 @@ public class RemoteClient extends Client implements KeyListener {
 				} else if (message.contains("mov:s")) {
 					fire();
 				}
-			}*/
-		}
+			}
+		}*/
 	}
 
 

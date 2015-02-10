@@ -17,20 +17,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
 USA.
  */
 
-import javax.swing.JFrame;
-import javax.swing.JScrollPane;
-import javax.swing.JTextPane;
-import javax.swing.JPanel;
-import javax.swing.JTable;
-import javax.swing.JOptionPane;
-
-import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 
 import javax.swing.BorderFactory;
-
-import java.io.IOException;
-import java.io.Serializable;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextPane;
 
 /**
  * The entry point and glue code for the game. It also contains some helpful
@@ -244,7 +239,7 @@ public class Mazewar extends JFrame {
                 while(true){
                 	try {
 						EchoPacket fromServer = (EchoPacket)clientConnection.in.readObject();
-						System.out.println(fromServer.message);
+						System.out.println(fromServer.event);
 						
 						remoteClient.update(fromServer);
 					} catch (Exception e) {

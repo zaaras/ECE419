@@ -2,6 +2,10 @@ import java.io.Serializable;
 
 public class EchoPacket implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	/* define packet formats */
 	public static final int ECHO_NULL    = 0;
 	public static final int ECHO_REQUEST = 100;
