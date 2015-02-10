@@ -21,6 +21,8 @@ public class EchoPacket implements Serializable {
 	int event;
 	String player;
 	
+	int packet_id;
+	
 	/* send your message here */
 	public String message;
 	
