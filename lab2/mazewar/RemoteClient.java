@@ -1,6 +1,9 @@
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Queue;
 
 /*
  Copyright (C) 2004 Geoffrey Alan Washburn
@@ -41,11 +44,13 @@ public class RemoteClient extends Client implements KeyListener {
 
 	private MazewarClient socket;
 	private String name;
+	private Queue<EchoPacket> que;
 
 	public RemoteClient(String nameIn, MazewarClient conn) {
 		super(nameIn);
 		socket = conn;
 		name = nameIn;
+		que = new LinkedList<EchoPacket>();
 	}
 
 	public void keyPressed(KeyEvent e) {
@@ -71,12 +76,10 @@ public class RemoteClient extends Client implements KeyListener {
 	}
 
 	public void keyReleased(KeyEvent arg0) {
-		// TODO Auto-generated method stub
 
 	}
 
 	public void keyTyped(KeyEvent arg0) {
-		// TODO Auto-generated method stub
 
 	}
 
@@ -84,36 +87,78 @@ public class RemoteClient extends Client implements KeyListener {
 		try {
 			socket.SendEvent(msg, name);
 		} catch (IOException e1) {
-			// TODO Auto-generated catch block
+			System.err.println("Sending event to server failed.");
 			e1.printStackTrace();
 		}
 	}
 
-	public void update(String message) {
+	public void update(EchoPacket message) {
 		
-		if(message.contains("mov:")){
-			if (message.contains("mov:q")) {
-				Mazewar.quit();
-				// Up-arrow moves forward.
-			} else if (message.contains("mov:u")) {
-				forward();
-				// Down-arrow moves backward.
-			} else if (message.contains("mov:b")) {
-				backup();
-				// Left-arrow turns left.
-			} else if (message.contains("mov:l")) {
-				turnLeft();
-				// Right-arrow turns right.
-			} else if (message.contains("mov:r")) {
-				turnRight();
-				// Spacebar fires.
-			} else if (message.contains("mov:s")) {
-				fire();
+		LinkedList<Integer> missingPackets ;
+		Iterator<Integer> packetid;
+		
+		que.add(message);
+		missingPackets = validateQue();
+		
+		if(missingPackets.size()!=0){
+			// some packets dropped, request from server
+			packetid = missingPackets.iterator();
+			while(packetid.hasNext()){
+				requestPacket(packetid.next());
 			}
+		}else{
+			/*if(message.contains("mov:")){
+				if (message.contains("mov:q")) {
+					Mazewar.quit();
+					// Up-arrow moves forward.
+				} else if (message.contains("mov:u")) {
+					forward();
+					// Down-arrow moves backward.
+				} else if (message.contains("mov:b")) {
+					backup();
+					// Left-arrow turns left.
+				} else if (message.contains("mov:l")) {
+					turnLeft();
+					// Right-arrow turns right.
+				} else if (message.contains("mov:r")) {
+					turnRight();
+					// Spacebar fires.
+				} else if (message.contains("mov:s")) {
+					fire();
+				}
+			}*/
 		}
 	}
 
-	/**
-	 * May want to fill in code here.
-	 */
+
+	private void requestPacket(Integer id) {
+		try {
+			socket.SendRequest(id, name);
+		} catch (IOException e) {
+			System.err.println("Requesting package from server failed.");
+			e.printStackTrace();
+		}
+	}
+
+	private LinkedList<Integer> validateQue() {
+		Iterator<EchoPacket> it = que.iterator();
+		EchoPacket currentPacket;
+		LinkedList<Integer> missingPackets = new LinkedList<Integer>();
+		int packetid = 0;
+		
+		while(it.hasNext()){	
+			currentPacket = it.next();
+			
+			while(currentPacket.packet_id != packetid){
+				// packet missing
+				missingPackets.add(packetid);
+				packetid++;
+			}
+
+			packetid++;
+		}
+		
+		return missingPackets;
+	}
+
 }

@@ -5,6 +5,7 @@ public class EchoPacket implements Serializable {
 	/* define packet formats */
 	public static final int ECHO_NULL    = 0;
 	public static final int ECHO_REQUEST = 100;
+	public static final int ECHO_MISSING = 101;
 	public static final int ECHO_REPLY   = 200;
 	public static final int ECHO_BYE     = 300;
 	

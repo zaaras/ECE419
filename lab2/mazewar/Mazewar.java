@@ -15,8 +15,8 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
 USA.
-*/
-  
+ */
+
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
@@ -33,14 +33,15 @@ import java.io.IOException;
 import java.io.Serializable;
 
 /**
- * The entry point and glue code for the game.  It also contains some helpful
+ * The entry point and glue code for the game. It also contains some helpful
  * global utility methods.
- * @author Geoffrey Washburn &lt;<a href="mailto:geoffw@cis.upenn.edu">geoffw@cis.upenn.edu</a>&gt;
+ * 
+ * @author Geoffrey Washburn &lt;<a
+ *         href="mailto:geoffw@cis.upenn.edu">geoffw@cis.upenn.edu</a>&gt;
  * @version $Id: Mazewar.java 371 2004-02-10 21:55:32Z geoffw $
  */
 
 public class Mazewar extends JFrame {
-
         /**
          * The default width of the {@link Maze}.
          */
