@@ -16,9 +16,10 @@ public class EchoPacket implements Serializable {
 	public static final int DOWN = 2;
 	public static final int RIGHT = 3;
 	public static final int LEFT = 4;
+	public static final int FIRE = 5;
 
 	int event;
-	int player;
+	String player;
 	
 	/* send your message here */
 	public String message;

@@ -40,6 +40,14 @@ public class MazewarClient {
 		SendMsg("Connected: " + name);
 
 	}
+
+	public void SendEvent(int event, String name) throws IOException{
+		EchoPacket packetToServer = new EchoPacket();
+		packetToServer.type = EchoPacket.ECHO_REQUEST;
+		packetToServer.player = name;
+		packetToServer.event = event ;
+		out.writeObject(packetToServer);
+	}
 	
 	public void SendMsg(String msg) throws IOException{
 		EchoPacket packetToServer = new EchoPacket();

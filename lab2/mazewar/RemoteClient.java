@@ -54,19 +54,19 @@ public class RemoteClient extends Client implements KeyListener {
 			Mazewar.quit();
 			// Up-arrow moves forward.
 		} else if (e.getKeyCode() == KeyEvent.VK_UP) {
-			toServer("forward");
+			toServer(EchoPacket.UP);
 			// Down-arrow moves backward.
 		} else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-			toServer("backup");
+			toServer(EchoPacket.DOWN);
 			// Left-arrow turns left.
 		} else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-			toServer("Left");
+			toServer(EchoPacket.LEFT);
 			// Right-arrow turns right.
 		} else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-			toServer("Right");
+			toServer(EchoPacket.RIGHT);
 			// Spacebar fires.
 		} else if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-			toServer("fire");
+			toServer(EchoPacket.FIRE);
 		}
 	}
 
@@ -80,9 +80,9 @@ public class RemoteClient extends Client implements KeyListener {
 
 	}
 
-	void toServer(String msg) {
+	void toServer(int msg) {
 		try {
-			socket.SendMsg(name + " " + msg);
+			socket.SendEvent(msg, name);
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();

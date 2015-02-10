@@ -1,5 +1,6 @@
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.concurrent.BlockingQueue;
 
@@ -19,7 +20,9 @@ public class MazewarServerHandlerThread extends Thread {
 	public void run() {
 		System.out.println("running");
 			try {
+				ObjectOutputStream toClient = new ObjectOutputStream(socket.getOutputStream());
 				ObjectInputStream fromClient = new ObjectInputStream(socket.getInputStream());
+				
 				EchoPacket packetFromClient;
 				
 				while (( packetFromClient = (EchoPacket) fromClient.readObject()) != null) {
