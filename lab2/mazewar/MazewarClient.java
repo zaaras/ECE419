@@ -37,7 +37,7 @@ public class MazewarClient {
 			
 		}
 		
-		SendMsg("Connected: " + name);
+		SendMsg("Connected: " + name, name);
 
 	}
 
@@ -49,9 +49,18 @@ public class MazewarClient {
 		out.writeObject(packetToServer);
 	}
 	
-	public void SendMsg(String msg) throws IOException{
+	public void SendRequest(int packetid, String name) throws IOException{
+		EchoPacket packetToServer = new EchoPacket();
+		packetToServer.type = EchoPacket.ECHO_MISSING;
+		packetToServer.player = name;
+		packetToServer.packet_id = packetid ;
+		out.writeObject(packetToServer);
+	}
+	
+	public void SendMsg(String msg, String name) throws IOException{
 		EchoPacket packetToServer = new EchoPacket();
 		packetToServer.type = EchoPacket.ECHO_REQUEST;
+		packetToServer.player = name;
 		packetToServer.message = msg ;
 		out.writeObject(packetToServer);
 	}
