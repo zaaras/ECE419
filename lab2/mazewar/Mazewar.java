@@ -151,7 +151,7 @@ public class Mazewar extends JFrame {
                 // here.
                 String[] args = new String[2];
                 args[0] = "localhost";
-                args[1] = "4444";
+                args[1] = "1111";
                
                 try {
                 	clientConnection = new MazewarClient(args, name);

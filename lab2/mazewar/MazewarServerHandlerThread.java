@@ -2,47 +2,54 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.concurrent.BlockingQueue;
-
 
 public class MazewarServerHandlerThread extends Thread {
-	
-	private Socket socket = null;
-	private BlockingQueue<EchoPacket> queue;
 
-	public MazewarServerHandlerThread(Socket socket, BlockingQueue<EchoPacket> q) {
+	private Socket socket = null;
+	private ObjectInputStream fromClient;
+
+	public MazewarServerHandlerThread(Connection con) {
 		super("MazewarServerHandlerThread");
-		this.socket = socket;
-		this.queue = q;
+		this.socket = con.client;
+		this.fromClient = con.fromClient;
 		System.out.println("Created new Thread to handle client");
+	}
+
+	public synchronized void increment() {
+		MazewarServer.packet_count++;
 	}
 
 	public void run() {
 		System.out.println("running");
-			try {
-				ObjectOutputStream toClient = new ObjectOutputStream(socket.getOutputStream());
-				ObjectInputStream fromClient = new ObjectInputStream(socket.getInputStream());
-				
-				EchoPacket packetFromClient;
-				
-				while (( packetFromClient = (EchoPacket) fromClient.readObject()) != null) {
-					System.out.println(packetFromClient.event);
-					//queue.put(packetFromClient);					
-				}
-				
-				fromClient.close();
-				socket.close();				
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} /*catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}		*/
-			
-			
-	}	
+		try {
+			//toClient = new ObjectOutputStream(socket.getOutputStream());
+			//fromClient = new ObjectInputStream(socket.getInputStream());
+
+			EchoPacket packetFromClient;
+
+			while ((packetFromClient = (EchoPacket) fromClient.readObject()) != null) {
+				System.out.println(packetFromClient.event);
+				increment();
+				packetFromClient.packet_id = MazewarServer.packet_count;
+				MazewarServer.queue.put(packetFromClient);
+			}
+
+
+			fromClient.close();
+			socket.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} /*
+		 * catch (InterruptedException e) { // TODO Auto-generated catch block
+		 * e.printStackTrace(); }
+		 */catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
 }

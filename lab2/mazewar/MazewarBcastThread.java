@@ -1,37 +1,51 @@
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.Iterator;
 
 
 public class MazewarBcastThread extends Thread {
 	
-	private LinkedBlockingQueue<EchoPacket> queue;
-	private ArrayList<Socket> clients;
-	
-	public MazewarBcastThread(LinkedBlockingQueue<EchoPacket> q,  ArrayList<Socket> clients) {
-		this.queue = q;
-		this.clients = clients;
+	public void run(){
+		while(true){			
+			if(!MazewarServer.queue.isEmpty()){
+				System.out.println("queue not empty");
+				broadcast();
+			}else{
+				System.out.println("queue empty");
+			}
+			
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
 	}
 	
-	public void run(){
-		ObjectOutputStream toClient;
-		Socket client;
-		for(int i = 0; i<clients.size();i++){
-				client = clients.get(i);
+	public void broadcast(){
+	
+		System.out.print("in broadcast");
+		
+		Connection con;
+	    ObjectOutputStream toClient;	    
+	    EchoPacket p;    
+	    		
+		for(int i = 0; i< MazewarServer.clients.size();i++){
+				con = MazewarServer.clients.get(i);
+				toClient = con.toClient;
 				try {
-					toClient = new ObjectOutputStream(client.getOutputStream());
-					toClient.writeObject(queue.take());
+					toClient.writeObject(MazewarServer.queue.take());
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				}
-				
+				}		
+			
 		}
 	}
 

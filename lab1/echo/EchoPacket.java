@@ -12,6 +12,7 @@ public class EchoPacket implements Serializable {
 	
 	/* initialized to be a null packet */
 	public int type = ECHO_NULL;
+	public int packet_id;
 	
 	/* send your message here */
 	public String message;
