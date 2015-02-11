@@ -47,6 +47,7 @@ public class MazewarServerHandlerThread extends Thread {
 						tempgui = it.next();
 						if(tempgui.getName().equals(packetFromClient.player)){
 							tempgui.update(packetFromClient);
+							System.out.println(tempgui.getPoint().getX());
 							break;
 							
 						}
