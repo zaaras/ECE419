@@ -24,11 +24,20 @@ public class MazewarServerHandlerThread extends Thread {
 			//toClient = new ObjectOutputStream(socket.getOutputStream());
 			//fromClient = new ObjectInputStream(socket.getInputStream());
 
-			EchoPacket packetFromClient;
+			EchoPacket packetFromClient;			
 
 			while ((packetFromClient = (EchoPacket) fromClient.readObject()) != null) {
 				System.out.println(packetFromClient.event);
 				increment();
+				if(packetFromClient.event == EchoPacket.CONN){
+					MazewarServer.client_list.add(new GUIClient(packetFromClient.player));
+					MazewarServer.maze.addClient(MazewarServer.client_list.getLast());
+					// Send to client his location
+					packetFromClient.x = MazewarServer.maze.getClientPoint(MazewarServer.client_list.getLast()).getX();
+					packetFromClient.y = MazewarServer.maze.getClientPoint(MazewarServer.client_list.getLast()).getY();
+					packetFromClient.type = EchoPacket.SERVER_LOC;
+				}
+				
 				packetFromClient.packet_id = MazewarServer.packet_count;
 				MazewarServer.queue.put(packetFromClient);
 			}

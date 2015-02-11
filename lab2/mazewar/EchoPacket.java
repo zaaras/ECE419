@@ -13,6 +13,7 @@ public class EchoPacket implements Serializable {
 	public static final int ECHO_NEW = 102;
 	public static final int ECHO_REPLY   = 200;
 	public static final int ECHO_BYE     = 300;
+	public static final int SERVER_LOC   = 301;
 	
 	/* the packet payload */
 	/* initialized to be a null packet */
@@ -25,9 +26,11 @@ public class EchoPacket implements Serializable {
 	public static final int FIRE = 5;
 	public static final int CONN = 6;
 	public static final int DIS = 7;
+	public static final int TICK = 8;
 	
 
 	int event;
+	int x,y;
 	String player;
 	
 	int packet_id;
