@@ -33,7 +33,6 @@ public class MazewarServerHandlerThread extends Thread {
 			EchoPacket packetFromClient;			
 
 			while ((packetFromClient = (EchoPacket) fromClient.readObject()) != null) {
-				System.out.println(packetFromClient.event);
 				increment();				
 				packetFromClient.packet_id = MazewarServer.packet_count;
 				if(packetFromClient.event == EchoPacket.CONN){
@@ -70,7 +69,6 @@ public class MazewarServerHandlerThread extends Thread {
 		Iterator<GUIClient> it ;//= MazewarServer.client_list.iterator();
 		int i;
 		
-		System.out.println("Processing connection for " + packetFromClient.player);
 		 
 		if(packetFromClient.event == EchoPacket.CONN){
 			tempgui = new GUIClient(packetFromClient.player);
