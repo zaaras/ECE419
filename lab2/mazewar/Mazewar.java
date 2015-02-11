@@ -308,7 +308,7 @@ public class Mazewar extends JFrame {
 								System.out
 										.println("<<<<--------Adding cilent " + temp.name);
 								remoteClients.add(new GUIClient(temp.name));
-								maze.addClient(remoteClients.get(playerCount));
+								maze.addClient(remoteClients.get(playerCount), new Point(temp.x,temp.y));
 								playerCount++;
 							}
 						}
