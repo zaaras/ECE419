@@ -159,7 +159,7 @@ public class Mazewar extends JFrame {
 		// You may want to put your network initialization code somewhere in
 		// here.
 		String[] args = new String[2];
-		args[0] = "localhost";
+		args[0] = "ug147.eecg.utoronto.ca";//"localhost";
 		args[1] = "1111";
 
 		try {
@@ -175,6 +175,7 @@ public class Mazewar extends JFrame {
 		Iterator<serverClient> it;
 		serverClient temp;
 		int localx = 0, localy = 0;
+		Direction localdir = Direction.North;
 
 		try {
 			
@@ -187,11 +188,12 @@ public class Mazewar extends JFrame {
 				temp = fromServerOutter.serverClients.get(i);
 				if (!temp.name.equals(localClient.getName())) {
 					remoteClients.add(new GUIClient(temp.name));
-					maze.addClient(remoteClients.getLast(), new Point(temp.x,temp.y));
+					maze.addClient(remoteClients.getLast(), new Point(temp.x,temp.y),temp.dir);
 					playerCount++;
 				}else{
 					localx = temp.x;
 					localy = temp.y;
+					localdir = temp.dir;
 				}
 			}
 			
@@ -200,7 +202,7 @@ public class Mazewar extends JFrame {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		maze.addClient(localClient, new Point(localx,localy));
+		maze.addClient(localClient, new Point(localx,localy),localdir);
 		this.addKeyListener(localClient);
 
 		// Create the GUIClient and connect it to the KeyListener queue
@@ -308,7 +310,7 @@ public class Mazewar extends JFrame {
 								System.out
 										.println("<<<<--------Adding cilent " + temp.name +" X: " + temp.x +" Y: "+temp.y);
 								remoteClients.add(new GUIClient(temp.name));
-								maze.addClient(remoteClients.get(playerCount), new Point(temp.x,temp.y));
+								maze.addClient(remoteClients.get(playerCount), new Point(temp.x,temp.y),temp.dir);
 								playerCount++;
 							}
 						}

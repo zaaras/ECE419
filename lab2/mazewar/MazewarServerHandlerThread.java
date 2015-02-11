@@ -87,6 +87,7 @@ public class MazewarServerHandlerThread extends Thread {
 			temp.name = tempgui.getName();
 			temp.x = tempgui.getPoint().getX();
 			temp.y = tempgui.getPoint().getY();
+			temp.dir = tempgui.getOrientation();
 			packetFromClient.dir = tempgui.getOrientation();
 			holder.add(temp);
 		}
