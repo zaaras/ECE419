@@ -36,6 +36,7 @@ public class MazewarServerHandlerThread extends Thread {
 					packetFromClient.x = MazewarServer.maze.getClientPoint(MazewarServer.client_list.getLast()).getX();
 					packetFromClient.y = MazewarServer.maze.getClientPoint(MazewarServer.client_list.getLast()).getY();
 					packetFromClient.type = EchoPacket.SERVER_LOC;
+					System.out.println("sending loc");
 				}
 				
 				packetFromClient.packet_id = MazewarServer.packet_count;

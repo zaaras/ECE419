@@ -36,7 +36,7 @@ public class MazewarClient {
 			System.exit(1);
 			
 		}
-		SendInit(name);
+		//SendInit(name);
 		//SendMsg("Connected: " + name, name);
 
 	}

@@ -19,6 +19,7 @@ USA.
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -39,250 +40,291 @@ import javax.swing.JTextPane;
  */
 
 public class Mazewar extends JFrame {
-        /**
-         * The default width of the {@link Maze}.
-         */
-        private final int mazeWidth = 20;
+	/**
+	 * The default width of the {@link Maze}.
+	 */
+	private final int mazeWidth = 20;
 
-        /**
-         * The default height of the {@link Maze}.
-         */
-        private final int mazeHeight = 10;
+	/**
+	 * The default height of the {@link Maze}.
+	 */
+	private final int mazeHeight = 10;
 
-        /**
-         * The default random seed for the {@link Maze}.
-         * All implementations of the same protocol must use 
-         * the same seed value, or your mazes will be different.
-         */
-        private final int mazeSeed = 42;
+	/**
+	 * The default random seed for the {@link Maze}. All implementations of the
+	 * same protocol must use the same seed value, or your mazes will be
+	 * different.
+	 */
+	private final int mazeSeed = 42;
 
-        /**
-         * The {@link Maze} that the game uses.
-         */
-        private Maze maze = null;
+	/**
+	 * The {@link Maze} that the game uses.
+	 */
+	private Maze maze = null;
 
-        /**
-         * The {@link GUIClient} for the game.
-         */
-        // private GUIClient guiClient = null;
-        private RemoteClient localClient = null;
+	/**
+	 * The {@link GUIClient} for the game.
+	 */
+	// private GUIClient guiClient = null;
+	private RemoteClient localClient = null;
 
-        /**
-         * The panel that displays the {@link Maze}.
-         */
-        private OverheadMazePanel overheadPanel = null;
+	/**
+	 * The panel that displays the {@link Maze}.
+	 */
+	private OverheadMazePanel overheadPanel = null;
 
-        /**
-         * The table the displays the scores.
-         */
-        private JTable scoreTable = null;
-        
-        /** 
-         * Create the textpane statically so that we can 
-         * write to it globally using
-         * the static consolePrint methods  
-         */
-        private static final JTextPane console = new JTextPane();
-      
-        /** 
-         * Write a message to the console followed by a newline.
-         * @param msg The {@link String} to print.
-         */ 
-        public static synchronized void consolePrintLn(String msg) {
-                console.setText(console.getText()+msg+"\n");
-        }
-        
-        /** 
-         * Write a message to the console.
-         * @param msg The {@link String} to print.
-         */ 
-        public static synchronized void consolePrint(String msg) {
-                console.setText(console.getText()+msg);
-        }
-        
-        /** 
-         * Clear the console. 
-         */
-        public static synchronized void clearConsole() {
-           console.setText("");
-        }
-        
-        /**
-         * Static method for performing cleanup before exiting the game.
-         */
-        public static void quit() {
-                // Put any network clean-up code you might have here.
-                // (inform other implementations on the network that you have 
-                //  left, etc.)
-                
+	/**
+	 * The table the displays the scores.
+	 */
+	private JTable scoreTable = null;
 
-                System.exit(0);
-        }
-       
-        /** 
-         * The place where all the pieces are put together. 
-         */
-        
-        private MazewarClient clientConnection = null; 
-        private LinkedList<GUIClient> remoteClients = new LinkedList<GUIClient>(); 
-        public static int TOTAL_PLAYERS = 4;
-        private int playerCount = 0;
-    	private Queue<EchoPacket> que;
-        
-        public Mazewar() {
-                super("ECE419 Mazewar");
-                consolePrintLn("ECE419 Mazewar started!");
-                
-                // Create the maze
-                maze = new MazeImpl(new Point(mazeWidth, mazeHeight), mazeSeed);
-                que = new LinkedList<EchoPacket>();
-                assert(maze != null);
-                
-                // Have the ScoreTableModel listen to the maze to find
-                // out how to adjust scores.
-                ScoreTableModel scoreModel = new ScoreTableModel();
-                assert(scoreModel != null);
-                maze.addMazeListener(scoreModel);
-                
-                // Throw up a dialog to get the GUIClient name.
-                String name = JOptionPane.showInputDialog("Enter your name");
-                if((name == null) || (name.length() == 0)) {
-                  Mazewar.quit();
-                }
-                
-                // You may want to put your network initialization code somewhere in
-                // here.
-                String[] args = new String[2];
-                args[0] = "localhost";
-                args[1] = "1111";
-               
-                try {
-                	clientConnection = new MazewarClient(args, name);
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					assert(false);
-				}
-                assert(clientConnection!=null);
-                
-                localClient = new RemoteClient(name,clientConnection);
-                maze.addClient(localClient);
-                this.addKeyListener(localClient);
-                
-                // Create the GUIClient and connect it to the KeyListener queue
-                
-                //guiClient = new GUIClient(name);
-                //maze.addClient(guiClient);
-                //this.addKeyListener(guiClient);
- 
-                // Use braces to force constructors not to be called at the beginning of the
-                // constructor.
-                {
-                        //maze.addClient(new RobotClient("Norby"));
-                        //maze.addClient(new RobotClient("Robbie"));
-                        //maze.addClient(new RobotClient("Clango"));
-                        //maze.addClient(new RobotClient("Marvin"));
-              
-                }
+	/**
+	 * Create the textpane statically so that we can write to it globally using
+	 * the static consolePrint methods
+	 */
+	private static final JTextPane console = new JTextPane();
 
-                
-                // Create the panel that will display the maze.
-                overheadPanel = new OverheadMazePanel(maze, localClient);
-                assert(overheadPanel != null);
-                maze.addMazeListener(overheadPanel);
-                
-                // Don't allow editing the console from the GUI
-                console.setEditable(false);
-                console.setFocusable(false);
-                console.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder()));
-               
-                // Allow the console to scroll by putting it in a scrollpane
-                JScrollPane consoleScrollPane = new JScrollPane(console);
-                assert(consoleScrollPane != null);
-                consoleScrollPane.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Console"));
-                
-                // Create the score table
-                scoreTable = new JTable(scoreModel);
-                assert(scoreTable != null);
-                scoreTable.setFocusable(false);
-                scoreTable.setRowSelectionAllowed(false);
+	/**
+	 * Write a message to the console followed by a newline.
+	 * 
+	 * @param msg
+	 *            The {@link String} to print.
+	 */
+	public static synchronized void consolePrintLn(String msg) {
+		console.setText(console.getText() + msg + "\n");
+	}
 
-                // Allow the score table to scroll too.
-                JScrollPane scoreScrollPane = new JScrollPane(scoreTable);
-                assert(scoreScrollPane != null);
-                scoreScrollPane.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Scores"));
-                
-                // Create the layout manager
-                GridBagLayout layout = new GridBagLayout();
-                GridBagConstraints c = new GridBagConstraints();
-                getContentPane().setLayout(layout);
-                
-                // Define the constraints on the components.
-                c.fill = GridBagConstraints.BOTH;
-                c.weightx = 1.0;
-                c.weighty = 3.0;
-                c.gridwidth = GridBagConstraints.REMAINDER;
-                layout.setConstraints(overheadPanel, c);
-                c.gridwidth = GridBagConstraints.RELATIVE;
-                c.weightx = 2.0;
-                c.weighty = 1.0;
-                layout.setConstraints(consoleScrollPane, c);
-                c.gridwidth = GridBagConstraints.REMAINDER;
-                c.weightx = 1.0;
-                layout.setConstraints(scoreScrollPane, c);
-                                
-                // Add the components
-                getContentPane().add(overheadPanel);
-                getContentPane().add(consoleScrollPane);
-                getContentPane().add(scoreScrollPane);
-                
-                // Pack everything neatly.
-                pack();
+	/**
+	 * Write a message to the console.
+	 * 
+	 * @param msg
+	 *            The {@link String} to print.
+	 */
+	public static synchronized void consolePrint(String msg) {
+		console.setText(console.getText() + msg);
+	}
 
-                // Let the magic begin.
-                setVisible(true);
-                overheadPanel.repaint();
-                this.requestFocusInWindow();
-                
-                while(true){
-                	try {
-						EchoPacket fromServer = (EchoPacket)clientConnection.in.readObject();
-						System.out.println(fromServer.player + " " + fromServer.event);
-						que.add(fromServer);
-						if(fromServer.player.contains(localClient.getName())){
-							localClient.update(fromServer);
-						}else{
-							if(fromServer.type == EchoPacket.ECHO_NEW){
-								System.out.print("New Client: " + fromServer.player);	
-								remoteClients.add(new GUIClient(fromServer.player));
-	                			maze.addClient(remoteClients.get(playerCount));
-	                			playerCount++;
-							}
-							int i;
-							for(i=0;i<TOTAL_PLAYERS;i++){
-								if(remoteClients.get(i).getName().contains(fromServer.player)){
-									remoteClients.get(i).update(fromServer);
-									break;
-								}
-							}
-						}
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-						System.exit(1);
+	/**
+	 * Clear the console.
+	 */
+	public static synchronized void clearConsole() {
+		console.setText("");
+	}
+
+	/**
+	 * Static method for performing cleanup before exiting the game.
+	 */
+	public static void quit() {
+		// Put any network clean-up code you might have here.
+		// (inform other implementations on the network that you have
+		// left, etc.)
+
+		System.exit(0);
+	}
+
+	/**
+	 * The place where all the pieces are put together.
+	 */
+
+	private MazewarClient clientConnection = null;
+	private LinkedList<GUIClient> remoteClients = new LinkedList<GUIClient>();
+	public static int TOTAL_PLAYERS = 4;
+	private int playerCount = 0;
+	private Queue<EchoPacket> que;
+	private boolean serverAck = false;
+	private boolean localClientAdded = false;
+	EchoPacket fromServerOutter = null;
+
+	public Mazewar() {
+		super("ECE419 Mazewar");
+		consolePrintLn("ECE419 Mazewar started!");
+
+		// Create the maze
+		maze = new MazeImpl(new Point(mazeWidth, mazeHeight), mazeSeed);
+		que = new LinkedList<EchoPacket>();
+		assert (maze != null);
+
+		// Have the ScoreTableModel listen to the maze to find
+		// out how to adjust scores.
+		ScoreTableModel scoreModel = new ScoreTableModel();
+		assert (scoreModel != null);
+		maze.addMazeListener(scoreModel);
+
+		// Throw up a dialog to get the GUIClient name.
+		String name = JOptionPane.showInputDialog("Enter your name");
+		if ((name == null) || (name.length() == 0)) {
+			Mazewar.quit();
+		}
+
+		// You may want to put your network initialization code somewhere in
+		// here.
+		String[] args = new String[2];
+		args[0] = "localhost";
+		args[1] = "1111";
+
+		try {
+			clientConnection = new MazewarClient(args, name);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			assert (false);
+		}
+		assert (clientConnection != null);
+
+		localClient = new RemoteClient(name, clientConnection);
+		
+		try {
+			localClient.initServer();// sends init to server
+			fromServerOutter = (EchoPacket) clientConnection.in.readObject();
+			while (!(fromServerOutter.player.equals(localClient.getName()))) {
+				fromServerOutter = (EchoPacket) clientConnection.in.readObject();
+			}
+			/*while ((fromServerOutter.type != EchoPacket.SERVER_LOC)) {
+			
+				System.out.println("here");
+				localClient.initServer();// sends init to server
+				fromServerOutter = (EchoPacket) clientConnection.in
+						.readObject();
+				
+			}*/
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		maze.addClient(localClient, new Point(fromServerOutter.x,
+				fromServerOutter.y));
+		this.addKeyListener(localClient);
+
+		// Create the GUIClient and connect it to the KeyListener queue
+
+		// guiClient = new GUIClient(name);
+		// maze.addClient(guiClient);
+		// this.addKeyListener(guiClient);
+
+		// Use braces to force constructors not to be called at the beginning of
+		// the
+		// constructor.
+		{
+			// maze.addClient(new RobotClient("Norby"));
+			// maze.addClient(new RobotClient("Robbie"));
+			// maze.addClient(new RobotClient("Clango"));
+			// maze.addClient(new RobotClient("Marvin"));
+
+		}
+
+		// Create the panel that will display the maze.
+		overheadPanel = new OverheadMazePanel(maze, localClient);
+		assert (overheadPanel != null);
+		maze.addMazeListener(overheadPanel);
+
+		// Don't allow editing the console from the GUI
+		console.setEditable(false);
+		console.setFocusable(false);
+		console.setBorder(BorderFactory.createTitledBorder(BorderFactory
+				.createEtchedBorder()));
+
+		// Allow the console to scroll by putting it in a scrollpane
+		JScrollPane consoleScrollPane = new JScrollPane(console);
+		assert (consoleScrollPane != null);
+		consoleScrollPane.setBorder(BorderFactory.createTitledBorder(
+				BorderFactory.createEtchedBorder(), "Console"));
+
+		// Create the score table
+		scoreTable = new JTable(scoreModel);
+		assert (scoreTable != null);
+		scoreTable.setFocusable(false);
+		scoreTable.setRowSelectionAllowed(false);
+
+		// Allow the score table to scroll too.
+		JScrollPane scoreScrollPane = new JScrollPane(scoreTable);
+		assert (scoreScrollPane != null);
+		scoreScrollPane.setBorder(BorderFactory.createTitledBorder(
+				BorderFactory.createEtchedBorder(), "Scores"));
+
+		// Create the layout manager
+		GridBagLayout layout = new GridBagLayout();
+		GridBagConstraints c = new GridBagConstraints();
+		getContentPane().setLayout(layout);
+
+		// Define the constraints on the components.
+		c.fill = GridBagConstraints.BOTH;
+		c.weightx = 1.0;
+		c.weighty = 3.0;
+		c.gridwidth = GridBagConstraints.REMAINDER;
+		layout.setConstraints(overheadPanel, c);
+		c.gridwidth = GridBagConstraints.RELATIVE;
+		c.weightx = 2.0;
+		c.weighty = 1.0;
+		layout.setConstraints(consoleScrollPane, c);
+		c.gridwidth = GridBagConstraints.REMAINDER;
+		c.weightx = 1.0;
+		layout.setConstraints(scoreScrollPane, c);
+
+		// Add the components
+		getContentPane().add(overheadPanel);
+		getContentPane().add(consoleScrollPane);
+		getContentPane().add(scoreScrollPane);
+
+		// Pack everything neatly.
+		pack();
+
+		// Let the magic begin.
+		setVisible(true);
+		overheadPanel.repaint();
+		this.requestFocusInWindow();
+
+		while (true) {
+			try {
+				EchoPacket fromServer = (EchoPacket) clientConnection.in
+						.readObject();
+				System.out.println(fromServer.player + " " + fromServer.event
+						+ " " + fromServer.type);
+				que.add(fromServer);
+
+				/*
+				 * if(!serverAck){ continue; }else{ if(!localClientAdded){
+				 * maze.addClient(localClient, new Point(fromServer.x,
+				 * fromServer.y)); localClientAdded = true; } serverAck = true;
+				 * }
+				 */
+
+				if (fromServer.player.equals(localClient.getName())) {
+					localClient.update(fromServer);
+				} else {
+					if (fromServer.type == EchoPacket.SERVER_LOC) {
+						System.out.println("New Client: " + fromServer.player);
+						remoteClients.add(new GUIClient(fromServer.player));
+						maze.addClient(remoteClients.get(playerCount));
+						playerCount++;
 					}
-                }
-        }
+					int i;
+					for (i = 0; i < TOTAL_PLAYERS; i++) {
+						if (remoteClients.get(i).getName()
+								.equals(fromServer.player)) {
+							remoteClients.get(i).update(fromServer);
+							break;
+						}
+					}
+				}
 
-        
-        /**
-         * Entry point for the game.  
-         * @param args Command-line arguments.
-         */
-        public static void main(String args[]) {
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				System.exit(1);
+			}
+		}
+	}
 
-                /* Create the GUI */
-                new Mazewar();
-                
-        }
+	/**
+	 * Entry point for the game.
+	 * 
+	 * @param args
+	 *            Command-line arguments.
+	 */
+	public static void main(String args[]) {
+
+		/* Create the GUI */
+		new Mazewar();
+
+	}
 }

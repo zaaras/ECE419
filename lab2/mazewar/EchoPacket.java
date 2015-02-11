@@ -27,6 +27,7 @@ public class EchoPacket implements Serializable {
 	public static final int CONN = 6;
 	public static final int DIS = 7;
 	public static final int TICK = 8;
+	public static final int LOC = 9;
 	
 
 	int event;

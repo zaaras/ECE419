@@ -16,7 +16,7 @@ public class MazewarServer {
 	public static LinkedBlockingQueue<EchoPacket> queue = new LinkedBlockingQueue<EchoPacket>();
 	public static ArrayList<Connection> clients = new ArrayList<Connection>();
 	public static MazewarBcastThread bt;
-	public static MazewarTickerThread tt;
+	//public static MazewarTickerThread tt;
 	public static int clientCount = 0;
 
 	public static Maze maze = new MazeImpl(new Point(mazeWidth, mazeHeight),

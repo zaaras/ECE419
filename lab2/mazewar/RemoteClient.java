@@ -79,6 +79,15 @@ public class RemoteClient extends Client implements KeyListener {
 	public void keyTyped(KeyEvent arg0) {
 
 	}
+	
+	void initServer() {
+		try {
+			socket.SendInit(name);
+		} catch (IOException e1) {
+			System.err.println("Sending event to server failed.");
+			e1.printStackTrace();
+		}
+	}
 
 	void toServer(int msg) {
 		try {
