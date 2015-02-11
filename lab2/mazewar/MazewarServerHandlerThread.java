@@ -21,6 +21,10 @@ public class MazewarServerHandlerThread extends Thread {
 	}
 
 	public void run() {
+		Iterator<GUIClient> it ;
+		serverClient temp = new serverClient();
+		GUIClient tempgui;
+		
 		System.out.println("running");
 		try {
 			//toClient = new ObjectOutputStream(socket.getOutputStream());
@@ -35,6 +39,19 @@ public class MazewarServerHandlerThread extends Thread {
 				if(packetFromClient.event == EchoPacket.CONN){
 					handleMsg(packetFromClient);
 				}else{
+					
+					it = MazewarServer.client_list.iterator();
+					
+					//update client positions
+					while(it.hasNext()){
+						tempgui = it.next();
+						if(tempgui.getName().equals(packetFromClient.player)){
+							tempgui.update(packetFromClient);
+							break;
+							
+						}
+					}
+					
 					MazewarServer.queue.put(packetFromClient);
 				}
 			}
@@ -72,6 +89,7 @@ public class MazewarServerHandlerThread extends Thread {
 			tempgui = new GUIClient(packetFromClient.player);
 			MazewarServer.maze.addClient(tempgui);
 			MazewarServer.client_list.add(tempgui);
+			//client_list.getCliet(umar).forward.
 		}
 		
 		it = MazewarServer.client_list.iterator();
