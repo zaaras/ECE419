@@ -79,7 +79,6 @@ public class GUIClient extends LocalClient implements KeyListener {
 
 		public void update(EchoPacket message) {
 			// TODO Auto-generated method stub
-			System.out.println("my X:" + this.getPoint().getX() + " my Y:" + this.getPoint().getY());
 			if (false) {
 				Mazewar.quit();
 				// Up-arrow moves forward.
