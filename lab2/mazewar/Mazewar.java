@@ -187,7 +187,7 @@ public class Mazewar extends JFrame {
 				temp = fromServerOutter.serverClients.get(i);
 				if (!temp.name.equals(localClient.getName())) {
 					remoteClients.add(new GUIClient(temp.name));
-					maze.addClient(remoteClients.get(playerCount), new Point(temp.x,temp.y));
+					maze.addClient(remoteClients.getLast(), new Point(temp.x,temp.y));
 					playerCount++;
 				}else{
 					localx = temp.x;
@@ -306,7 +306,7 @@ public class Mazewar extends JFrame {
 							temp = it.next();
 							if (!temp.name.equals(localClient.getName())) {
 								System.out
-										.println("<<<<--------Adding cilent " + temp.name);
+										.println("<<<<--------Adding cilent " + temp.name +" X: " + temp.x +" Y: "+temp.y);
 								remoteClients.add(new GUIClient(temp.name));
 								maze.addClient(remoteClients.get(playerCount), new Point(temp.x,temp.y));
 								playerCount++;

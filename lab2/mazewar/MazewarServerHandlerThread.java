@@ -38,7 +38,7 @@ public class MazewarServerHandlerThread extends Thread {
 				packetFromClient.packet_id = MazewarServer.packet_count;
 				if(packetFromClient.event == EchoPacket.CONN){
 					handleMsg(packetFromClient);
-				}else{			
+				}else{
 					MazewarServer.queue.put(packetFromClient);
 				}
 			}
