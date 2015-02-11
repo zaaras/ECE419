@@ -74,6 +74,28 @@ public class GUIClient extends LocalClient implements KeyListener {
          * @param e The {@link KeyEvent} that occurred.
          */
         public void keyTyped(KeyEvent e) {
+        	
         }
 
+		public void update(EchoPacket message) {
+			// TODO Auto-generated method stub
+			if (false) {
+				Mazewar.quit();
+				// Up-arrow moves forward.
+			} else if (message.event == EchoPacket.UP) {
+				forward();
+				// Down-arrow moves backward.
+			} else if (message.event == EchoPacket.DOWN) {
+				backup();
+				// Left-arrow turns left.
+			} else if (message.event == EchoPacket.LEFT) {
+				turnLeft();
+				// Right-arrow turns right.
+			} else if (message.event == EchoPacket.RIGHT) {
+				turnRight();
+				// Spacebar fires.
+			} else if (message.event == EchoPacket.FIRE) {
+				fire();
+			}
+		}
 }
