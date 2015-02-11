@@ -38,20 +38,7 @@ public class MazewarServerHandlerThread extends Thread {
 				packetFromClient.packet_id = MazewarServer.packet_count;
 				if(packetFromClient.event == EchoPacket.CONN){
 					handleMsg(packetFromClient);
-				}else{
-					
-					it = MazewarServer.client_list.iterator();
-					
-					//update client positions
-					while(it.hasNext()){
-						tempgui = it.next();
-						if(tempgui.getName().equals(packetFromClient.player)){
-							tempgui.update(packetFromClient);
-							break;
-							
-						}
-					}
-					
+				}else{			
 					MazewarServer.queue.put(packetFromClient);
 				}
 			}
@@ -84,7 +71,7 @@ public class MazewarServerHandlerThread extends Thread {
 		int i;
 		
 		System.out.println("Processing connection for " + packetFromClient.player);
-		
+		 
 		if(packetFromClient.event == EchoPacket.CONN){
 			tempgui = new GUIClient(packetFromClient.player);
 			MazewarServer.maze.addClient(tempgui);
@@ -100,9 +87,11 @@ public class MazewarServerHandlerThread extends Thread {
 			temp.name = tempgui.getName();
 			temp.x = tempgui.getPoint().getX();
 			temp.y = tempgui.getPoint().getY();
+			packetFromClient.dir = tempgui.getOrientation();
 			holder.add(temp);
 		}
 		
+
 		packetFromClient.type = EchoPacket.SERVER_LOC;
 		packetFromClient.serverClients = holder;
 		MazewarServer.queue.put(packetFromClient);	

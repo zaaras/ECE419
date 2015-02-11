@@ -34,6 +34,7 @@ public class EchoPacket implements Serializable {
 	int event;
 	int playerCount;
 	int x,y;
+	Direction dir;
 	String player;
 	
 	int packet_id;

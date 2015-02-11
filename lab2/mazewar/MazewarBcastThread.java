@@ -1,4 +1,5 @@
 import java.io.ObjectOutputStream;
+import java.util.Iterator;
 
 
 public class MazewarBcastThread extends Thread {
@@ -24,7 +25,10 @@ public class MazewarBcastThread extends Thread {
 	}
 	
 	public synchronized void broadcast(){
-
+		
+		Iterator<GUIClient> it ;
+		serverClient temp = new serverClient();
+		GUIClient tempgui;
 		
 		Connection con;
 	    ObjectOutputStream toClient;	    
@@ -32,11 +36,15 @@ public class MazewarBcastThread extends Thread {
 	    
 	    p = MazewarServer.queue.poll();	    
 	    
-	    //System.out.println(MazewarServer.queue.toString());
+	    
+		it = MazewarServer.client_list.iterator();
+		
 	    
 	    if(p!=null){
 		    System.out.println(p.player + " " + p.event);
 		    
+		    
+			//send updates to client side
 			for(int i = 0; i< MazewarServer.clients.size();i++){
 					con = MazewarServer.clients.get(i);
 					toClient = con.toClient;
@@ -47,6 +55,16 @@ public class MazewarBcastThread extends Thread {
 						e.printStackTrace();
 					}		
 				
+			}
+			
+			//update client positions on server side
+			while(it.hasNext()){
+				tempgui = it.next();
+				if(tempgui.getName().equals(p.player)){
+					tempgui.update(p);
+					break;
+					
+				}
 			}
 	    }
 	}

@@ -6,7 +6,9 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class MazewarServer {
+
+
+public class MazewarServer{
 
 	private final static int mazeWidth = 20;
 	private final static int mazeHeight = 10;
@@ -21,6 +23,7 @@ public class MazewarServer {
 
 	public static Maze maze = new MazeImpl(new Point(mazeWidth, mazeHeight),
 			mazeSeed);
+
 	
 	public static LinkedList<GUIClient> client_list = new LinkedList<GUIClient>(); 
 
@@ -28,7 +31,7 @@ public class MazewarServer {
 		ServerSocket serverSocket = null;
 		Connection con;
 		boolean listening = true;
-
+		
 		bt = new MazewarBcastThread();
 		bt.start();
 
