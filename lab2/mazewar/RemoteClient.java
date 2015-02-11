@@ -1,9 +1,6 @@
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.Queue;
 
 /*
  Copyright (C) 2004 Geoffrey Alan Washburn
@@ -44,13 +41,13 @@ public class RemoteClient extends Client implements KeyListener {
 
 	private MazewarClient socket;
 	private String name;
-	private Queue<EchoPacket> que;
+
 
 	public RemoteClient(String nameIn, MazewarClient conn) {
 		super(nameIn);
 		socket = conn;
 		name = nameIn;
-		que = new LinkedList<EchoPacket>();
+		
 	}
 
 	public void keyPressed(KeyEvent e) {
@@ -97,7 +94,28 @@ public class RemoteClient extends Client implements KeyListener {
 		//LinkedList<Integer> missingPackets ;
 		//Iterator<Integer> packetid;
 		
-		que.add(message);
+		
+		if(message.player.contains(name)){
+			if (false) {
+				Mazewar.quit();
+				// Up-arrow moves forward.
+			} else if (message.event == EchoPacket.UP) {
+				forward();
+				// Down-arrow moves backward.
+			} else if (message.event == EchoPacket.DOWN) {
+				backup();
+				// Left-arrow turns left.
+			} else if (message.event == EchoPacket.LEFT) {
+				turnLeft();
+				// Right-arrow turns right.
+			} else if (message.event == EchoPacket.RIGHT) {
+				turnRight();
+				// Spacebar fires.
+			} else if (message.event == EchoPacket.FIRE) {
+				fire();
+			}
+		}
+		
 		/*missingPackets = validateQue();
 		
 		if(missingPackets.size()!=0){
@@ -108,31 +126,12 @@ public class RemoteClient extends Client implements KeyListener {
 				//requestPacket(packetid.next());
 			}
 		}else{
-			/*if(message.contains("mov:")){
-				if (message.contains("mov:q")) {
-					Mazewar.quit();
-					// Up-arrow moves forward.
-				} else if (message.contains("mov:u")) {
-					forward();
-					// Down-arrow moves backward.
-				} else if (message.contains("mov:b")) {
-					backup();
-					// Left-arrow turns left.
-				} else if (message.contains("mov:l")) {
-					turnLeft();
-					// Right-arrow turns right.
-				} else if (message.contains("mov:r")) {
-					turnRight();
-					// Spacebar fires.
-				} else if (message.contains("mov:s")) {
-					fire();
-				}
-			}
+			/*
 		}*/
 	}
 
 
-	private void requestPacket(Integer id) {
+	/*private void requestPacket(Integer id) {
 		try {
 			socket.SendRequest(id, name);
 		} catch (IOException e) {
@@ -160,6 +159,6 @@ public class RemoteClient extends Client implements KeyListener {
 		}
 		
 		return missingPackets;
-	}
+	}*/
 
 }

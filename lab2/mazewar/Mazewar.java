@@ -19,6 +19,8 @@ USA.
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.util.LinkedList;
+import java.util.Queue;
 
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
@@ -62,8 +64,8 @@ public class Mazewar extends JFrame {
         /**
          * The {@link GUIClient} for the game.
          */
-        private GUIClient guiClient = null;
-        private RemoteClient remoteClient = null;
+        // private GUIClient guiClient = null;
+        private RemoteClient localClient = null;
 
         /**
          * The panel that displays the {@link Maze}.
@@ -122,6 +124,10 @@ public class Mazewar extends JFrame {
          */
         
         private MazewarClient clientConnection = null; 
+        private LinkedList<GUIClient> remoteClients = new LinkedList<GUIClient>(); 
+        public static int TOTAL_PLAYERS = 4;
+        private int playerCount = 0;
+    	private Queue<EchoPacket> que;
         
         public Mazewar() {
                 super("ECE419 Mazewar");
@@ -129,6 +135,7 @@ public class Mazewar extends JFrame {
                 
                 // Create the maze
                 maze = new MazeImpl(new Point(mazeWidth, mazeHeight), mazeSeed);
+                que = new LinkedList<EchoPacket>();
                 assert(maze != null);
                 
                 // Have the ScoreTableModel listen to the maze to find
@@ -158,9 +165,9 @@ public class Mazewar extends JFrame {
 				}
                 assert(clientConnection!=null);
                 
-                remoteClient = new RemoteClient(name,clientConnection);
-                maze.addClient(remoteClient);
-                this.addKeyListener(remoteClient);
+                localClient = new RemoteClient(name,clientConnection);
+                maze.addClient(localClient);
+                this.addKeyListener(localClient);
                 
                 // Create the GUIClient and connect it to the KeyListener queue
                 
@@ -171,15 +178,16 @@ public class Mazewar extends JFrame {
                 // Use braces to force constructors not to be called at the beginning of the
                 // constructor.
                 {
-                        maze.addClient(new RobotClient("Norby"));
-                        maze.addClient(new RobotClient("Robbie"));
-                        maze.addClient(new RobotClient("Clango"));
-                        maze.addClient(new RobotClient("Marvin"));
+                        //maze.addClient(new RobotClient("Norby"));
+                        //maze.addClient(new RobotClient("Robbie"));
+                        //maze.addClient(new RobotClient("Clango"));
+                        //maze.addClient(new RobotClient("Marvin"));
+              
                 }
 
                 
                 // Create the panel that will display the maze.
-                overheadPanel = new OverheadMazePanel(maze, remoteClient);
+                overheadPanel = new OverheadMazePanel(maze, localClient);
                 assert(overheadPanel != null);
                 maze.addMazeListener(overheadPanel);
                 
@@ -240,8 +248,24 @@ public class Mazewar extends JFrame {
                 	try {
 						EchoPacket fromServer = (EchoPacket)clientConnection.in.readObject();
 						System.out.println(fromServer.player + " " + fromServer.event);
-						
-						remoteClient.update(fromServer);
+						que.add(fromServer);
+						if(fromServer.player.contains(localClient.getName())){
+							localClient.update(fromServer);
+						}else{
+							if(fromServer.type == EchoPacket.ECHO_NEW){
+								System.out.print("New Client: " + fromServer.player);	
+								remoteClients.add(new GUIClient(fromServer.player));
+	                			maze.addClient(remoteClients.get(playerCount));
+	                			playerCount++;
+							}
+							int i;
+							for(i=0;i<TOTAL_PLAYERS;i++){
+								if(remoteClients.get(i).getName().contains(fromServer.player)){
+									remoteClients.get(i).update(fromServer);
+									break;
+								}
+							}
+						}
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
