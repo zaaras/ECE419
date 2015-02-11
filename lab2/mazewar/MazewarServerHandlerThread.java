@@ -1,6 +1,8 @@
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.Socket;
+import java.util.Iterator;
+import java.util.LinkedList;
 
 public class MazewarServerHandlerThread extends Thread {
 
@@ -28,19 +30,13 @@ public class MazewarServerHandlerThread extends Thread {
 
 			while ((packetFromClient = (EchoPacket) fromClient.readObject()) != null) {
 				System.out.println(packetFromClient.event);
-				increment();
-				if(packetFromClient.event == EchoPacket.CONN){
-					MazewarServer.client_list.add(new GUIClient(packetFromClient.player));
-					MazewarServer.maze.addClient(MazewarServer.client_list.getLast());
-					// Send to client his location
-					packetFromClient.x = MazewarServer.maze.getClientPoint(MazewarServer.client_list.getLast()).getX();
-					packetFromClient.y = MazewarServer.maze.getClientPoint(MazewarServer.client_list.getLast()).getY();
-					packetFromClient.type = EchoPacket.SERVER_LOC;
-					System.out.println("sending loc");
-				}
-				
+				increment();				
 				packetFromClient.packet_id = MazewarServer.packet_count;
-				MazewarServer.queue.put(packetFromClient);
+				if(packetFromClient.event == EchoPacket.CONN){
+					handleMsg(packetFromClient);
+				}else{
+					MazewarServer.queue.put(packetFromClient);
+				}
 			}
 
 
@@ -60,5 +56,37 @@ public class MazewarServerHandlerThread extends Thread {
 			e.printStackTrace();
 		}
 
+	}
+
+	private synchronized void handleMsg(EchoPacket packetFromClient) throws InterruptedException {
+		
+		LinkedList<serverClient> holder = new LinkedList<serverClient>();
+		serverClient temp = new serverClient();
+		GUIClient tempgui;
+		Iterator<GUIClient> it ;//= MazewarServer.client_list.iterator();
+		int i;
+		
+		System.out.println("Processing connection for " + packetFromClient.player);
+		
+		if(packetFromClient.event == EchoPacket.CONN){
+			tempgui = new GUIClient(packetFromClient.player);
+			MazewarServer.maze.addClient(tempgui);
+			MazewarServer.client_list.add(tempgui);
+		}
+		
+		it = MazewarServer.client_list.iterator();
+		
+		while(it.hasNext()){
+			tempgui = it.next();
+			temp = new serverClient();
+			temp.name = tempgui.getName();
+			temp.x = tempgui.getPoint().getX();
+			temp.y = tempgui.getPoint().getY();
+			holder.add(temp);
+		}
+		
+		packetFromClient.type = EchoPacket.SERVER_LOC;
+		packetFromClient.serverClients = holder;
+		MazewarServer.queue.put(packetFromClient);	
 	}
 }

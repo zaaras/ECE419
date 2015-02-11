@@ -19,7 +19,7 @@ USA.
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.io.IOException;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -172,27 +172,35 @@ public class Mazewar extends JFrame {
 		assert (clientConnection != null);
 
 		localClient = new RemoteClient(name, clientConnection);
-		
+		Iterator<serverClient> it;
+		serverClient temp;
+		int localx = 0, localy = 0;
+
 		try {
+			
 			localClient.initServer();// sends init to server
 			fromServerOutter = (EchoPacket) clientConnection.in.readObject();
-			while (!(fromServerOutter.player.equals(localClient.getName()))) {
-				fromServerOutter = (EchoPacket) clientConnection.in.readObject();
-			}
-			/*while ((fromServerOutter.type != EchoPacket.SERVER_LOC)) {
 			
-				System.out.println("here");
-				localClient.initServer();// sends init to server
-				fromServerOutter = (EchoPacket) clientConnection.in
-						.readObject();
-				
-			}*/
+			it = fromServerOutter.serverClients.iterator();
+			
+			for(int i = 0; i<fromServerOutter.serverClients.size();i++){
+				temp = fromServerOutter.serverClients.get(i);
+				if (!temp.name.equals(localClient.getName())) {
+					remoteClients.add(new GUIClient(temp.name));
+					maze.addClient(remoteClients.get(playerCount), new Point(temp.x,temp.y));
+					playerCount++;
+				}else{
+					localx = temp.x;
+					localy = temp.y;
+				}
+			}
+			
+			
 		} catch (Exception e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		maze.addClient(localClient, new Point(fromServerOutter.x,
-				fromServerOutter.y));
+		maze.addClient(localClient, new Point(localx,localy));
 		this.addKeyListener(localClient);
 
 		// Create the GUIClient and connect it to the KeyListener queue
@@ -273,37 +281,55 @@ public class Mazewar extends JFrame {
 		overheadPanel.repaint();
 		this.requestFocusInWindow();
 
+		Iterator<GUIClient> itgui;
+		GUIClient tempgui;
+		int i;
 		while (true) {
 			try {
 				EchoPacket fromServer = (EchoPacket) clientConnection.in
 						.readObject();
+				
 				System.out.println(fromServer.player + " " + fromServer.event
 						+ " " + fromServer.type);
+				
 				que.add(fromServer);
-
-				/*
-				 * if(!serverAck){ continue; }else{ if(!localClientAdded){
-				 * maze.addClient(localClient, new Point(fromServer.x,
-				 * fromServer.y)); localClientAdded = true; } serverAck = true;
-				 * }
-				 */
 
 				if (fromServer.player.equals(localClient.getName())) {
 					localClient.update(fromServer);
+
 				} else {
 					if (fromServer.type == EchoPacket.SERVER_LOC) {
-						System.out.println("New Client: " + fromServer.player);
-						remoteClients.add(new GUIClient(fromServer.player));
-						maze.addClient(remoteClients.get(playerCount));
-						playerCount++;
-					}
-					int i;
-					for (i = 0; i < TOTAL_PLAYERS; i++) {
-						if (remoteClients.get(i).getName()
-								.equals(fromServer.player)) {
-							remoteClients.get(i).update(fromServer);
-							break;
+						// Some one joined the game
+
+						it = fromServer.serverClients.iterator();
+						while (it.hasNext()) {
+							temp = it.next();
+							if (!temp.name.equals(localClient.getName())) {
+								System.out
+										.println("<<<<--------Adding cilent " + temp.name);
+								remoteClients.add(new GUIClient(temp.name));
+								maze.addClient(remoteClients.get(playerCount));
+								playerCount++;
+							}
 						}
+					} else {
+
+						
+						 itgui = remoteClients.iterator(); 
+						 while(itgui.hasNext()) { 
+							 tempgui = itgui.next(); 
+							 if(tempgui.getName().equals(fromServer.player))
+								 	tempgui.update(fromServer);
+						 }
+						 
+
+						/*for (i = 0; i < TOTAL_PLAYERS; i++) {
+							if (remoteClients.get(i).getName().equals(fromServer.player)) {
+								remoteClients.get(i).update(fromServer);
+								break;
+							}
+						}*/
+						
 					}
 				}
 

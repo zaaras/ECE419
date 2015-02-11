@@ -1,4 +1,5 @@
 import java.io.Serializable;
+import java.util.LinkedList;
 
 public class EchoPacket implements Serializable {
 
@@ -31,6 +32,7 @@ public class EchoPacket implements Serializable {
 	
 
 	int event;
+	int playerCount;
 	int x,y;
 	String player;
 	
@@ -38,5 +40,7 @@ public class EchoPacket implements Serializable {
 	
 	/* send your message here */
 	public String message;
+	
+	LinkedList<serverClient> serverClients;
 	
 }
