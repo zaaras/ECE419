@@ -65,6 +65,7 @@ public class MazewarServer{
 			new MazewarServerHandlerThread(con).start();
 		}
 
+
 		serverSocket.close();
 	}
 	

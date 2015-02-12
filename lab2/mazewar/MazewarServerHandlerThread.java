@@ -33,14 +33,19 @@ public class MazewarServerHandlerThread extends Thread {
 				packetFromClient.packet_id = MazewarServer.packet_count;
 				if(packetFromClient.event == EchoPacket.CONN){
 					handleMsg(packetFromClient);
-				}else{
+				}else if(packetFromClient.event == EchoPacket.ECHO_BYE){
+					MazewarServer.queue.put(packetFromClient);
+					break;
+				}
+				else{
 					MazewarServer.queue.put(packetFromClient);
 				}
 			}
 
-
+			removeClient(socket);
 			fromClient.close();
 			socket.close();
+			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -55,6 +60,19 @@ public class MazewarServerHandlerThread extends Thread {
 			e.printStackTrace();
 		}
 
+	}
+
+	private void removeClient(Socket socket) {
+		System.out.println("Removing client");
+		Connection con;
+		//send updates to client side
+		for(int i = 0; i< MazewarServer.clients.size();i++){
+				con = MazewarServer.clients.get(i);
+				if(con.client.equals(socket)){
+					MazewarServer.clients.remove(i);
+				}
+		}
+		
 	}
 
 	private synchronized void handleMsg(EchoPacket packetFromClient) throws InterruptedException {
