@@ -509,6 +509,7 @@ public class MazeImpl extends Maze implements Serializable, ClientListener,
 		cell.setContents(null);
 		// Pick a random starting point, and check to see if it is already
 		// occupied
+		System.out.println("Killed " + target.getName());
 		point = new Point(randomGen.nextInt(maxX), randomGen.nextInt(maxY));
 		cell = getCellImpl(point);
 		// Repeat until we find an empty cell
