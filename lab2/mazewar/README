@@ -1,0 +1,8 @@
+Lab2 Mazewar
+Zaara Syeda - 998 199 765
+Ghulam Umar - 998 513 988
+
+Instructions to run:
+- Build using script ./makeserver.sh
+- Start server with script ./run_server.sh
+- Connect clients with script ./run.sh
