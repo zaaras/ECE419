@@ -131,7 +131,7 @@ public class Mazewar extends JFrame {
 	private LinkedList<GUIClient> remoteClients = new LinkedList<GUIClient>();
 	public static int TOTAL_PLAYERS = 4;
 	private int playerCount = 0;
-	public static Queue<EchoPacket> que =  new LinkedList<EchoPacket>();
+	public static Queue<EchoPacket> que = new LinkedList<EchoPacket>();
 	EchoPacket fromServerOutter = null;
 
 	public Mazewar() {
@@ -158,9 +158,8 @@ public class Mazewar extends JFrame {
 		// here.
 		String[] args = new String[2];
 
-
 		args[0] = "ug139.eecg.utoronto.ca";// "localhost";
-		//args[0] = "localhost";// "ug147.eecg.utoronto.ca";//"localhost";
+		// args[0] = "localhost";// "ug147.eecg.utoronto.ca";//"localhost";
 		args[1] = "1111";
 
 		try {
@@ -182,11 +181,18 @@ public class Mazewar extends JFrame {
 
 			localClient.initServer();// sends init to server
 			fromServerOutter = (EchoPacket) clientConnection.in.readObject();
+			
+			while (fromServerOutter.player == null){
+				fromServerOutter = (EchoPacket) clientConnection.in.readObject();
+			}
+			
+			System.out.println(fromServerOutter.player);
 
-			while (!(fromServerOutter.player.equals(localClient.getName()))
-					|| fromServerOutter.type != EchoPacket.SERVER_LOC) {
-				fromServerOutter = (EchoPacket) clientConnection.in
-						.readObject();
+			while (!((fromServerOutter.player.equals(localClient.getName())) 
+					|| fromServerOutter.type != EchoPacket.SERVER_LOC)) {
+				
+				while ((fromServerOutter = (EchoPacket) clientConnection.in
+						.readObject()) == null);
 			}
 
 			it = fromServerOutter.serverClients.iterator();
@@ -298,22 +304,19 @@ public class Mazewar extends JFrame {
 
 		Iterator<GUIClient> itgui;
 		GUIClient tempgui;
-		
-		ClientQueManager quethread = new ClientQueManager(clientConnection);
-		quethread.start();		
-		
-		/*while(true){
-			EchoPacket fromServer = (EchoPacket) clientConnection.in
-					.readObject();
 
-			if (fromServer == null) {
-				System.out.println("killed");
-			}
-			
-			que.add(fromServer);
-		}*/
-		
-		
+		ClientQueManager quethread = new ClientQueManager(clientConnection);
+		quethread.start();
+
+		/*
+		 * while(true){ EchoPacket fromServer = (EchoPacket) clientConnection.in
+		 * .readObject();
+		 * 
+		 * if (fromServer == null) { System.out.println("killed"); }
+		 * 
+		 * que.add(fromServer); }
+		 */
+
 		while (true) {
 			try {
 				EchoPacket fromServer;
@@ -322,11 +325,10 @@ public class Mazewar extends JFrame {
 				 * System.out.println(fromServer.player + " " + fromServer.event
 				 * + " " + fromServer.type); }
 				 */
-				
-				while(que.isEmpty());
-				fromServer = que.poll();
 
-				
+				while (que.isEmpty())
+					;
+				fromServer = que.poll();
 
 				if (fromServer.event == EchoPacket.TICK) {
 					maze.missleTick();
