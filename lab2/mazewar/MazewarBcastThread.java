@@ -41,7 +41,7 @@ public class MazewarBcastThread extends Thread {
 		
 	    
 	    if(p!=null){
-		    System.out.println(p.player + " " + p.event);
+		   // System.out.println(p.player + " " + p.event);
 		    
 		    
 			//send updates to client side
