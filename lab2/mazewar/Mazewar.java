@@ -44,12 +44,12 @@ public class Mazewar extends JFrame {
 	/**
 	 * The default width of the {@link Maze}.
 	 */
-	private final int mazeWidth = 5;
+	private final int mazeWidth = 10;
 
 	/**
 	 * The default height of the {@link Maze}.
 	 */
-	private final int mazeHeight = 2;
+	private final int mazeHeight = 5;
 
 	/**
 	 * The default random seed for the {@link Maze}. All implementations of the
@@ -159,8 +159,8 @@ public class Mazewar extends JFrame {
 		// here.
 		String[] args = new String[2];
 
-		// args[0] = "ug147.eecg.utoronto.ca";// "localhost";
-		args[0] = "localhost";// "ug147.eecg.utoronto.ca";//"localhost";
+		args[0] = "ug139.eecg.utoronto.ca";// "localhost";
+		//args[0] = "localhost";// "ug147.eecg.utoronto.ca";//"localhost";
 		args[1] = "1111";
 
 		try {
