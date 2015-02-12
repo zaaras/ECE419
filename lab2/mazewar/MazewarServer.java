@@ -36,8 +36,8 @@ public class MazewarServer{
 		bt = new MazewarBcastThread();
 		bt.start();
 
-		//tt = new MazewarTickerThread();
-	//	tt.start();
+		tt = new MazewarTickerThread();
+		tt.start();
 
 		try {
 			if (args.length == 1) {
