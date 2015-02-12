@@ -315,7 +315,7 @@ public class Mazewar extends JFrame {
 						it = fromServer.serverClients.iterator();
 						while (it.hasNext()) {
 							temp = it.next();
-							if (!temp.name.equals(localClient.getName())) {
+							if (!temp.name.equals(localClient.getName()) && !alreadyConnected(remoteClients, temp)) {
 								System.out.println("<<<<--------Adding cilent "
 										+ temp.name + " X: " + temp.x + " Y: "
 										+ temp.y);
