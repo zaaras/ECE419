@@ -10,8 +10,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class MazewarServer{
 
-	private final static int mazeWidth = 10;
-	private final static int mazeHeight = 5;
+	private final static int mazeWidth = 20;
+	private final static int mazeHeight = 10;
 	private final static int mazeSeed = 42;
 
 	public static int packet_count = 0;
