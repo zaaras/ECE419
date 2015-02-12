@@ -187,7 +187,7 @@ public class Mazewar extends JFrame {
 
 			for (int i = 0; i < fromServerOutter.serverClients.size(); i++) {
 				temp = fromServerOutter.serverClients.get(i);
-				if (!temp.name.equals(localClient.getName())) {
+				if (!temp.name.equals(localClient.getName()) && !alreadyConnected(remoteClients, temp)) {
 					remoteClients.add(new GUIClient(temp.name));
 					maze.addClient(remoteClients.getLast(), new Point(temp.x,
 							temp.y), temp.dir);
@@ -343,6 +343,22 @@ public class Mazewar extends JFrame {
 				System.exit(1);
 			}
 		}
+	}
+
+	private boolean alreadyConnected(LinkedList<GUIClient> rc,
+			serverClient sclient) {
+		
+		Iterator<GUIClient> it = rc.iterator();
+		GUIClient temp;
+		
+		while(it.hasNext()){
+			temp = it.next();
+			if(temp.getName().equals(sclient.name)){
+				return true;
+			}
+		}
+		
+		return false;
 	}
 
 	/**
