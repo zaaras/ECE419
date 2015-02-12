@@ -14,12 +14,12 @@ public class MazewarBcastThread extends Thread {
 				//System.out.println("queue empty");
 			}
 			
-			try {
+			/*try {
 				Thread.sleep(10);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}
+			}*/
 			
 		}
 	}
@@ -41,7 +41,7 @@ public class MazewarBcastThread extends Thread {
 		
 	    
 	    if(p!=null){
-		    System.out.println(p.player + " " + p.event);
+		    //System.out.println(p.player + " " + p.event);
 		    
 		    
 			//send updates to client side

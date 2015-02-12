@@ -52,6 +52,8 @@ public abstract class Maze {
 
     /* Client functionality ************************************************/
     
+    public abstract void missleTick();
+    
     /** 
      * Add a {@link Client} at random location in the {@link Maze}. 
      * @param client {@link Client} to be added to the {@link Maze}.

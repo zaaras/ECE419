@@ -291,10 +291,15 @@ public class Mazewar extends JFrame {
 				EchoPacket fromServer = (EchoPacket) clientConnection.in
 						.readObject();
 				
-				System.out.println(fromServer.player + " " + fromServer.event
-						+ " " + fromServer.type);
+				//System.out.println(fromServer.player + " " + fromServer.event
+				//		+ " " + fromServer.type);
 				
 				que.add(fromServer);
+				
+				if(fromServer.event == EchoPacket.TICK){
+					maze.missleTick();
+					continue;
+				}
 
 				if (fromServer.player.equals(localClient.getName())) {
 					localClient.update(fromServer);
