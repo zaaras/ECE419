@@ -159,8 +159,8 @@ public class Mazewar extends JFrame {
 		String[] args = new String[2];
 
 
-		//args[0] = "ug139.eecg.utoronto.ca";// "localhost";
-		 args[0] = "localhost";// "ug147.eecg.utoronto.ca";//"localhost";
+		args[0] = "ug139.eecg.utoronto.ca";// "localhost";
+		//args[0] = "localhost";// "ug147.eecg.utoronto.ca";//"localhost";
 		args[1] = "1111";
 
 		try {
