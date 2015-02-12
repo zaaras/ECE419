@@ -42,7 +42,7 @@ public class MazewarServerHandlerThread extends Thread {
 				}
 			}
 
-			removeClient(socket);
+			removeClient(socket,packetFromClient.player);
 			fromClient.close();
 			socket.close();
 			
@@ -62,15 +62,25 @@ public class MazewarServerHandlerThread extends Thread {
 
 	}
 
-	private void removeClient(Socket socket) {
+	private void removeClient(Socket socket, String name) {
 		System.out.println("Removing client");
 		Connection con;
+		GUIClient gui;
 		//send updates to client side
 		for(int i = 0; i< MazewarServer.clients.size();i++){
 				con = MazewarServer.clients.get(i);
 				if(con.client.equals(socket)){
 					MazewarServer.clients.remove(i);
 				}
+		}
+		
+		for(int i = 0; i < MazewarServer.client_list.size();i++){
+			if(MazewarServer.client_list.get(i).getName().equals(name)){
+				MazewarServer.negativeIncrement();
+				MazewarServer.maze.removeClient(MazewarServer.client_list.get(i));
+				MazewarServer.client_list.remove(i);
+
+			}
 		}
 		
 	}

@@ -73,4 +73,7 @@ public class MazewarServer{
 		packet_count++;
 	}
 
+	public static synchronized void negativeIncrement() {
+		clientCount--;
+	}
 }

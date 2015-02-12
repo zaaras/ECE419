@@ -347,6 +347,23 @@ public class Mazewar extends JFrame {
 					}
 
 				}
+				
+				if(fromServer.type == EchoPacket.ECHO_BYE){
+					Iterator<GUIClient> itremote;
+					Client tempremote;
+					itremote = remoteClients.iterator();
+					System.out.println(remoteClients.size());
+					while (itremote.hasNext()) {
+						tempremote = itremote.next();
+						if(tempremote.getName().equals(fromServer.player)){
+							maze.removeClient(tempremote);
+							itremote.remove();
+							playerCount--;
+							System.out.println(remoteClients.size());
+						}
+					}
+					
+				}
 
 				if (fromServer.player.equals(localClient.getName())) {
 					localClient.update(fromServer);
