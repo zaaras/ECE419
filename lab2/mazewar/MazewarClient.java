@@ -73,4 +73,12 @@ public class MazewarClient {
 		out.writeObject(packetToServer);
 	}
 
+	public void SendExit(String name) throws IOException {
+		EchoPacket packetToServer = new EchoPacket();
+		packetToServer.type = EchoPacket.ECHO_BYE;
+		packetToServer.player = name;
+		packetToServer.event = EchoPacket.ECHO_BYE;
+		out.writeObject(packetToServer);
+	}
+
 }
