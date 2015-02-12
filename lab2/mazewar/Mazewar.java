@@ -131,7 +131,7 @@ public class Mazewar extends JFrame {
 	private LinkedList<GUIClient> remoteClients = new LinkedList<GUIClient>();
 	public static int TOTAL_PLAYERS = 4;
 	private int playerCount = 0;
-	private Queue<EchoPacket> que;
+	public static Queue<EchoPacket> que =  new LinkedList<EchoPacket>();
 	EchoPacket fromServerOutter = null;
 
 	public Mazewar() {
@@ -140,7 +140,6 @@ public class Mazewar extends JFrame {
 
 		// Create the maze
 		maze = new MazeImpl(new Point(mazeWidth, mazeHeight), mazeSeed);
-		que = new LinkedList<EchoPacket>();
 		assert (maze != null);
 
 		// Have the ScoreTableModel listen to the maze to find
@@ -160,7 +159,7 @@ public class Mazewar extends JFrame {
 		String[] args = new String[2];
 
 		args[0] = "ug139.eecg.utoronto.ca";// "localhost";
-		//args[0] = "localhost";// "ug147.eecg.utoronto.ca";//"localhost";
+		// args[0] = "localhost";// "ug147.eecg.utoronto.ca";//"localhost";
 		args[1] = "1111";
 
 		try {
@@ -182,6 +181,12 @@ public class Mazewar extends JFrame {
 
 			localClient.initServer();// sends init to server
 			fromServerOutter = (EchoPacket) clientConnection.in.readObject();
+
+			while (!(fromServerOutter.player.equals(localClient.getName()))
+					|| fromServerOutter.type != EchoPacket.SERVER_LOC) {
+				fromServerOutter = (EchoPacket) clientConnection.in
+						.readObject();
+			}
 
 			it = fromServerOutter.serverClients.iterator();
 
@@ -290,27 +295,41 @@ public class Mazewar extends JFrame {
 
 		Iterator<GUIClient> itgui;
 		GUIClient tempgui;
+		
+		ClientQueManager quethread = new ClientQueManager(clientConnection);
+		quethread.start();		
+		
+		/*while(true){
+			EchoPacket fromServer = (EchoPacket) clientConnection.in
+					.readObject();
+
+			if (fromServer == null) {
+				System.out.println("killed");
+			}
+			
+			que.add(fromServer);
+		}*/
+		
+		
 		while (true) {
 			try {
-				EchoPacket fromServer = (EchoPacket) clientConnection.in
-						.readObject();
+				EchoPacket fromServer;
+				/*
+				 * if (fromServer.player != null) {
+				 * System.out.println(fromServer.player + " " + fromServer.event
+				 * + " " + fromServer.type); }
+				 */
+				
+				while(que.isEmpty());
+				fromServer = que.poll();
 
-				if (fromServer == null) {
-					System.out.println("killed");
-				}
-
-				/*if (fromServer.player != null) {
-					System.out.println(fromServer.player + " "
-							+ fromServer.event + " " + fromServer.type);
-				}*/
-
-				que.add(fromServer);
+				
 
 				if (fromServer.event == EchoPacket.TICK) {
 					maze.missleTick();
 					continue;
 				}
-				
+
 				if (fromServer.type == EchoPacket.KILL) {
 					Iterator<GUIClient> itremote;
 					Client src = null, tar = null, tempremote;
@@ -322,47 +341,48 @@ public class Mazewar extends JFrame {
 							src = tempremote;
 						}
 					}
-					
-					if(localClient.getName().equals(fromServer.killer)){
+
+					if (localClient.getName().equals(fromServer.killer)) {
 						src = localClient;
 					}
-					
+
 					assert (src != null);
-					
-					if(localClient.getName().equals(fromServer.player)){
+
+					if (localClient.getName().equals(fromServer.player)) {
 						tar = localClient;
-						maze.killClient(src, tar, new Point(
-								fromServer.x, fromServer.y), fromServer.dir);
-					}else{
+						maze.killClient(src, tar, new Point(fromServer.x,
+								fromServer.y), fromServer.dir);
+					} else {
 						itremote = remoteClients.iterator();
 						while (itremote.hasNext()) {
 							tempremote = itremote.next();
 							if (tempremote.getName().equals(fromServer.player)) {
 								tar = tempremote;
 								maze.killClient(src, tar, new Point(
-										fromServer.x, fromServer.y), fromServer.dir);
+										fromServer.x, fromServer.y),
+										fromServer.dir);
 								break;
 							}
 						}
 					}
 
 				}
-				
-				if(fromServer.type == EchoPacket.ECHO_BYE){
+
+				if (fromServer.type == EchoPacket.ECHO_BYE) {
 					Iterator<GUIClient> itremote;
 					Client tempremote;
 					itremote = remoteClients.iterator();
 					System.out.println(remoteClients.size());
 					while (itremote.hasNext()) {
 						tempremote = itremote.next();
-						if(tempremote.getName().equals(fromServer.player)){
+						if (tempremote.getName().equals(fromServer.player)) {
 							maze.removeClient(tempremote);
 							itremote.remove();
 							playerCount--;
 							System.out.println(remoteClients.size());
 						}
 					}
-					
+
 				}
 
 				if (fromServer.player.equals(localClient.getName())) {
