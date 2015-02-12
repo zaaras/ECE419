@@ -159,8 +159,8 @@ public class Mazewar extends JFrame {
 		// here.
 		String[] args = new String[2];
 
-		args[0] = "ug139.eecg.utoronto.ca";// "localhost";
-		//args[0] = "localhost";// "ug147.eecg.utoronto.ca";//"localhost";
+		//args[0] = "ug139.eecg.utoronto.ca";// "localhost";
+		args[0] = "localhost";// "ug147.eecg.utoronto.ca";//"localhost";
 		args[1] = "1111";
 
 		try {
@@ -192,6 +192,7 @@ public class Mazewar extends JFrame {
 					remoteClients.add(new GUIClient(temp.name));
 					maze.addClient(remoteClients.getLast(), new Point(temp.x,
 							temp.y), temp.dir);
+					System.out.println("adding with dir " + temp.dir);
 					playerCount++;
 				} else {
 					localClient.spawX = temp.x;
@@ -207,6 +208,7 @@ public class Mazewar extends JFrame {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+		System.out.println("Adding with dir " + localdir);
 		maze.addClient(localClient, new Point(localx, localy), localdir);
 		this.addKeyListener(localClient);
 
@@ -379,7 +381,7 @@ public class Mazewar extends JFrame {
 									&& !alreadyConnected(remoteClients, temp)) {
 								System.out.println("<<<<--------Adding cilent "
 										+ temp.name + " X: " + temp.x + " Y: "
-										+ temp.y);
+										+ temp.y + " dir " + temp.dir);
 								remoteClients.add(new GUIClient(temp.name));
 								maze.addClient(remoteClients.get(playerCount),
 										new Point(temp.x, temp.y), temp.dir);

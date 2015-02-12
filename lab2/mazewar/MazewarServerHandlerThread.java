@@ -94,6 +94,7 @@ public class MazewarServerHandlerThread extends Thread {
 		int i;
 		
 		 
+		packetFromClient.dir = Direction.North;
 		if(packetFromClient.event == EchoPacket.CONN){
 			tempgui = new GUIClient(packetFromClient.player);
 			MazewarServer.maze.addClient(tempgui);
@@ -110,7 +111,8 @@ public class MazewarServerHandlerThread extends Thread {
 			temp.x = tempgui.getPoint().getX();
 			temp.y = tempgui.getPoint().getY();
 			temp.dir = tempgui.getOrientation();
-			packetFromClient.dir = tempgui.getOrientation();
+			//packetFromClient.dir = temp.dir;
+			System.out.println("Dir of client: " + temp.dir);
 			holder.add(temp);
 		}
 		
