@@ -39,6 +39,7 @@ import javax.swing.JTextPane;
  * @version $Id: Mazewar.java 371 2004-02-10 21:55:32Z geoffw $
  */
 
+@SuppressWarnings("serial")
 public class Mazewar extends JFrame {
 	/**
 	 * The default width of the {@link Maze}.
@@ -131,8 +132,6 @@ public class Mazewar extends JFrame {
 	public static int TOTAL_PLAYERS = 4;
 	private int playerCount = 0;
 	private Queue<EchoPacket> que;
-	private boolean serverAck = false;
-	private boolean localClientAdded = false;
 	EchoPacket fromServerOutter = null;
 
 	public Mazewar() {
@@ -159,7 +158,7 @@ public class Mazewar extends JFrame {
 		// You may want to put your network initialization code somewhere in
 		// here.
 		String[] args = new String[2];
-		args[0] = "ug147.eecg.utoronto.ca";//"localhost";
+		args[0] = "ug147.eecg.utoronto.ca";// "localhost";
 		args[1] = "1111";
 
 		try {
@@ -178,31 +177,31 @@ public class Mazewar extends JFrame {
 		Direction localdir = Direction.North;
 
 		try {
-			
+
 			localClient.initServer();// sends init to server
 			fromServerOutter = (EchoPacket) clientConnection.in.readObject();
-			
+
 			it = fromServerOutter.serverClients.iterator();
-			
-			for(int i = 0; i<fromServerOutter.serverClients.size();i++){
+
+			for (int i = 0; i < fromServerOutter.serverClients.size(); i++) {
 				temp = fromServerOutter.serverClients.get(i);
 				if (!temp.name.equals(localClient.getName())) {
 					remoteClients.add(new GUIClient(temp.name));
-					maze.addClient(remoteClients.getLast(), new Point(temp.x,temp.y),temp.dir);
+					maze.addClient(remoteClients.getLast(), new Point(temp.x,
+							temp.y), temp.dir);
 					playerCount++;
-				}else{
+				} else {
 					localx = temp.x;
 					localy = temp.y;
 					localdir = temp.dir;
 				}
 			}
-			
-			
+
 		} catch (Exception e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		maze.addClient(localClient, new Point(localx,localy),localdir);
+		maze.addClient(localClient, new Point(localx, localy), localdir);
 		this.addKeyListener(localClient);
 
 		// Create the GUIClient and connect it to the KeyListener queue
@@ -285,22 +284,21 @@ public class Mazewar extends JFrame {
 
 		Iterator<GUIClient> itgui;
 		GUIClient tempgui;
-		int i;
 		while (true) {
 			try {
 				EchoPacket fromServer = (EchoPacket) clientConnection.in
 						.readObject();
-				
-				if(fromServer == null){
+
+				if (fromServer == null) {
 					System.out.println("killed");
 				}
-				
-				//System.out.println(fromServer.player + " " + fromServer.event
-				//		+ " " + fromServer.type);
-				
+
+				// System.out.println(fromServer.player + " " + fromServer.event
+				// + " " + fromServer.type);
+
 				que.add(fromServer);
-				
-				if(fromServer.event == EchoPacket.TICK){
+
+				if (fromServer.event == EchoPacket.TICK) {
 					maze.missleTick();
 					continue;
 				}
@@ -316,31 +314,24 @@ public class Mazewar extends JFrame {
 						while (it.hasNext()) {
 							temp = it.next();
 							if (!temp.name.equals(localClient.getName())) {
-								System.out
-										.println("<<<<--------Adding cilent " + temp.name +" X: " + temp.x +" Y: "+temp.y);
+								System.out.println("<<<<--------Adding cilent "
+										+ temp.name + " X: " + temp.x + " Y: "
+										+ temp.y);
 								remoteClients.add(new GUIClient(temp.name));
-								maze.addClient(remoteClients.get(playerCount), new Point(temp.x,temp.y),temp.dir);
+								maze.addClient(remoteClients.get(playerCount),
+										new Point(temp.x, temp.y), temp.dir);
 								playerCount++;
 							}
 						}
 					} else {
 
-						
-						 itgui = remoteClients.iterator(); 
-						 while(itgui.hasNext()) { 
-							 tempgui = itgui.next(); 
-							 if(tempgui.getName().equals(fromServer.player))
-								 	tempgui.update(fromServer);
-						 }
-						 
+						itgui = remoteClients.iterator();
+						while (itgui.hasNext()) {
+							tempgui = itgui.next();
+							if (tempgui.getName().equals(fromServer.player))
+								tempgui.update(fromServer);
+						}
 
-						/*for (i = 0; i < TOTAL_PLAYERS; i++) {
-							if (remoteClients.get(i).getName().equals(fromServer.player)) {
-								remoteClients.get(i).update(fromServer);
-								break;
-							}
-						}*/
-						
 					}
 				}
 
