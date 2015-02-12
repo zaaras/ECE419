@@ -14,7 +14,6 @@ public class MazewarBcastThread extends Thread {
 	public synchronized void broadcast() {
 
 		Iterator<GUIClient> it;
-		serverClient temp = new serverClient();
 		GUIClient tempgui;
 
 		Connection con;

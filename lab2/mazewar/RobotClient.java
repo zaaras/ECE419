@@ -18,8 +18,6 @@ USA.
 */
  
 import java.util.Random;
-import java.util.Vector;
-import java.lang.Runnable;
 
 /**
  * A very naive implementation of a computer controlled {@link LocalClient}.  Basically
@@ -116,7 +114,7 @@ public class RobotClient extends LocalClient implements Runnable {
                         
                         // Sleep so the humans can possibly compete.
                         try {
-                                thread.sleep(200);
+                                Thread.sleep(200);
                         } catch(Exception e) {
                                 // Shouldn't happen.
                         }

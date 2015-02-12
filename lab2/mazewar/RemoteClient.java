@@ -114,10 +114,11 @@ public class RemoteClient extends Client implements KeyListener {
 		
 		
 		if(message.player.contains(name)){
-			if (false) {
-				Mazewar.quit();
-				// Up-arrow moves forward.
-			} else if (message.event == EchoPacket.UP) {
+			//if (false) {
+			//	Mazewar.quit();
+			//	// Up-arrow moves forward.
+			//} else 
+			if (message.event == EchoPacket.UP) {
 				forward();
 				// Down-arrow moves backward.
 			} else if (message.event == EchoPacket.DOWN) {

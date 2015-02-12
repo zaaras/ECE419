@@ -1,4 +1,3 @@
-import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.Socket;
 import java.util.Iterator;
@@ -13,13 +12,10 @@ public class MazewarServerHandlerThread extends Thread {
 		super("MazewarServerHandlerThread");
 		this.socket = con.client;
 		this.fromClient = con.fromClient;
-		System.out.println("Created new Thread to handle client");
+		System.out.println("New client");
 	}
 
 	public void run() {
-		Iterator<GUIClient> it ;
-		serverClient temp = new serverClient();
-		GUIClient tempgui;
 		
 		System.out.println("running");
 		try {
@@ -46,26 +42,16 @@ public class MazewarServerHandlerThread extends Thread {
 			fromClient.close();
 			socket.close();
 			
-		} catch (IOException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} /*
-		 * catch (InterruptedException e) { // TODO Auto-generated catch block
-		 * e.printStackTrace(); }
-		 */catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		} 
 
 	}
 
 	private void removeClient(Socket socket, String name) {
-		System.out.println("Removing client");
+		System.out.println("Removing client " + name);
 		Connection con;
-		GUIClient gui;
 		//send updates to client side
 		for(int i = 0; i< MazewarServer.clients.size();i++){
 				con = MazewarServer.clients.get(i);
@@ -91,8 +77,6 @@ public class MazewarServerHandlerThread extends Thread {
 		serverClient temp = new serverClient();
 		GUIClient tempgui;
 		Iterator<GUIClient> it ;//= MazewarServer.client_list.iterator();
-		int i;
-		
 		 
 		packetFromClient.dir = Direction.North;
 		if(packetFromClient.event == EchoPacket.CONN){
