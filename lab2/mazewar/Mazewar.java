@@ -44,12 +44,12 @@ public class Mazewar extends JFrame {
 	/**
 	 * The default width of the {@link Maze}.
 	 */
-	private final int mazeWidth = 20;
+	private final int mazeWidth = 5;
 
 	/**
 	 * The default height of the {@link Maze}.
 	 */
-	private final int mazeHeight = 10;
+	private final int mazeHeight = 2;
 
 	/**
 	 * The default random seed for the {@link Maze}. All implementations of the
@@ -159,8 +159,8 @@ public class Mazewar extends JFrame {
 		// here.
 		String[] args = new String[2];
 
-		//args[0] = "ug147.eecg.utoronto.ca";// "localhost";
-		args[0] = "localhost";//"ug147.eecg.utoronto.ca";//"localhost";
+		// args[0] = "ug147.eecg.utoronto.ca";// "localhost";
+		args[0] = "localhost";// "ug147.eecg.utoronto.ca";//"localhost";
 		args[1] = "1111";
 
 		try {
@@ -173,7 +173,7 @@ public class Mazewar extends JFrame {
 		assert (clientConnection != null);
 
 		localClient = new RemoteClient(name, clientConnection);
-		Iterator<serverClient> it;
+		Iterator<serverClient> it = null;
 		serverClient temp;
 		int localx = 0, localy = 0;
 		Direction localdir = Direction.North;
@@ -187,12 +187,16 @@ public class Mazewar extends JFrame {
 
 			for (int i = 0; i < fromServerOutter.serverClients.size(); i++) {
 				temp = fromServerOutter.serverClients.get(i);
-				if (!temp.name.equals(localClient.getName()) && !alreadyConnected(remoteClients, temp)) {
+				if (!temp.name.equals(localClient.getName())
+						&& !alreadyConnected(remoteClients, temp)) {
 					remoteClients.add(new GUIClient(temp.name));
 					maze.addClient(remoteClients.getLast(), new Point(temp.x,
 							temp.y), temp.dir);
 					playerCount++;
 				} else {
+					localClient.spawX = temp.x;
+					localClient.spawY = temp.y;
+					localClient.spawDir = temp.dir;
 					localx = temp.x;
 					localy = temp.y;
 					localdir = temp.dir;
@@ -295,14 +299,53 @@ public class Mazewar extends JFrame {
 					System.out.println("killed");
 				}
 
-				// System.out.println(fromServer.player + " " + fromServer.event
-				// + " " + fromServer.type);
+				/*if (fromServer.player != null) {
+					System.out.println(fromServer.player + " "
+							+ fromServer.event + " " + fromServer.type);
+				}*/
 
 				que.add(fromServer);
 
 				if (fromServer.event == EchoPacket.TICK) {
 					maze.missleTick();
 					continue;
+				}
+				
+				if (fromServer.type == EchoPacket.KILL) {
+					Iterator<GUIClient> itremote;
+					Client src = null, tar = null, tempremote;
+
+					itremote = remoteClients.iterator();
+					while (itremote.hasNext()) {
+						tempremote = itremote.next();
+						if (tempremote.getName().equals(fromServer.killer)) {
+							src = tempremote;
+						}
+					}
+					
+					if(localClient.getName().equals(fromServer.killer)){
+						src = localClient;
+					}
+					
+					assert (src != null);
+					
+					if(localClient.getName().equals(fromServer.player)){
+						tar = localClient;
+						maze.killClient(src, tar, new Point(
+								fromServer.x, fromServer.y), fromServer.dir);
+					}else{
+						itremote = remoteClients.iterator();
+						while (itremote.hasNext()) {
+							tempremote = itremote.next();
+							if (tempremote.getName().equals(fromServer.player)) {
+								tar = tempremote;
+								maze.killClient(src, tar, new Point(
+										fromServer.x, fromServer.y), fromServer.dir);
+								break;
+							}
+						}
+					}
+
 				}
 
 				if (fromServer.player.equals(localClient.getName())) {
@@ -315,7 +358,8 @@ public class Mazewar extends JFrame {
 						it = fromServer.serverClients.iterator();
 						while (it.hasNext()) {
 							temp = it.next();
-							if (!temp.name.equals(localClient.getName()) && !alreadyConnected(remoteClients, temp)) {
+							if (!temp.name.equals(localClient.getName())
+									&& !alreadyConnected(remoteClients, temp)) {
 								System.out.println("<<<<--------Adding cilent "
 										+ temp.name + " X: " + temp.x + " Y: "
 										+ temp.y);
@@ -347,17 +391,17 @@ public class Mazewar extends JFrame {
 
 	private boolean alreadyConnected(LinkedList<GUIClient> rc,
 			serverClient sclient) {
-		
+
 		Iterator<GUIClient> it = rc.iterator();
 		GUIClient temp;
-		
-		while(it.hasNext()){
+
+		while (it.hasNext()) {
 			temp = it.next();
-			if(temp.getName().equals(sclient.name)){
+			if (temp.getName().equals(sclient.name)) {
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
 

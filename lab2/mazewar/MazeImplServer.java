@@ -17,24 +17,21 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
 USA.
  */
 
-import java.lang.Thread;
-import java.lang.Runnable;
-import java.io.Serializable;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.Random;
-import java.util.Vector;
-import java.util.Map;
-import java.util.Set;
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Collection;
 import java.util.LinkedList;
-import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+import java.util.Vector;
 
 /**
  * A concrete implementation of a {@link Maze}.
@@ -44,7 +41,7 @@ import java.util.HashMap;
  * @version $Id: MazeImpl.java 371 2004-02-10 21:55:32Z geoffw $
  */
 
-public class MazeImpl extends Maze implements Serializable, ClientListener,
+public class MazeImplServer extends Maze implements Serializable, ClientListener,
 		Runnable {
 
 	/**
@@ -56,7 +53,7 @@ public class MazeImpl extends Maze implements Serializable, ClientListener,
 	 * @param seed
 	 *            Initial seed for the random number generator.
 	 */
-	public MazeImpl(Point point, long seed) {
+	public MazeImplServer(Point point, long seed) {
 		maxX = point.getX();
 		assert (maxX > 0);
 		maxY = point.getY();
@@ -86,12 +83,12 @@ public class MazeImpl extends Maze implements Serializable, ClientListener,
 	}
 
 	/**
-	 * Create a maze from a serialized {@link MazeImpl} object written to a
+	 * Create a maze from a serialized {@link MazeImplServer} object written to a
 	 * file.
 	 * 
 	 * @param mazefile
 	 *            The filename to load the serialized object from.
-	 * @return A reconstituted {@link MazeImpl}.
+	 * @return A reconstituted {@link MazeImplServer}.
 	 */
 	public static Maze readMazeFile(String mazefile) throws IOException,
 			ClassNotFoundException {
@@ -104,7 +101,7 @@ public class MazeImpl extends Maze implements Serializable, ClientListener,
 	}
 
 	/**
-	 * Serialize this {@link MazeImpl} to a file.
+	 * Serialize this {@link MazeImplServer} to a file.
 	 * 
 	 * @param mazefile
 	 *            The filename to write the serialized object to.
@@ -498,6 +495,13 @@ public class MazeImpl extends Maze implements Serializable, ClientListener,
 	 *            The {@link Client} that was killed.
 	 */
 	public synchronized void killClient(Client source, Client target) {
+		EchoPacket killPack = new EchoPacket();
+		killPack.type = EchoPacket.KILL;
+		killPack.event = EchoPacket.KILL;
+		killPack.player = target.getName();
+		killPack.killer = source.getName();
+		
+		
 		assert (source != null);
 		assert (target != null);
 		Mazewar.consolePrintLn(source.getName() + " just vaporized "
@@ -509,7 +513,8 @@ public class MazeImpl extends Maze implements Serializable, ClientListener,
 		cell.setContents(null);
 		// Pick a random starting point, and check to see if it is already
 		// occupied
-		//System.out.println("Killed " + target.getName());
+		System.out.println("Server Killed " + target.getName());
+
 		point = new Point(randomGen.nextInt(maxX), randomGen.nextInt(maxY));
 		cell = getCellImpl(point);
 		// Repeat until we find an empty cell
@@ -521,6 +526,15 @@ public class MazeImpl extends Maze implements Serializable, ClientListener,
 		while (cell.isWall(d)) {
 			d = Direction.random();
 		}
+		killPack.dir = d;
+		killPack.x = point.getX();
+		killPack.y = point.getY();
+		try {
+			MazewarServer.queue.put(killPack);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		cell.setContents(target);
 		clientMap.put(target, new DirectedPoint(point, d));
 		update();
@@ -530,8 +544,8 @@ public class MazeImpl extends Maze implements Serializable, ClientListener,
 	public synchronized void killClient(Client source, Client target,Point pt, Direction dir) {
 		assert (source != null);
 		assert (target != null);
-		/*Mazewar.consolePrintLn(source.getName() + " just vaporized "
-				+ target.getName());*/
+		Mazewar.consolePrintLn(source.getName() + " just vaporized "
+				+ target.getName());
 		Object o = clientMap.remove(target);
 		assert (o instanceof Point);
 		Point point = (Point) o;
@@ -555,7 +569,6 @@ public class MazeImpl extends Maze implements Serializable, ClientListener,
 		}*/
 		cell.setContents(target);
 		clientMap.put(target, new DirectedPoint(point, d));
-		System.out.println("Moving to x " + point.getX() + " y " + point.getY());
 		update();
 		notifyClientKilled(source, target);
 	}
@@ -835,7 +848,7 @@ public class MazeImpl extends Maze implements Serializable, ClientListener,
 
 		/**
 		 * Indicate that this {@link Cell} has been visited while building the
-		 * {@link MazeImpl}.
+		 * {@link MazeImplServer}.
 		 */
 		public void setVisited() {
 			visited = true;

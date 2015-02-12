@@ -53,6 +53,8 @@ public abstract class Maze {
     /* Client functionality ************************************************/
     
     public abstract void missleTick();
+    public abstract void killClient(Client src,Client tar);
+    public abstract void killClient(Client src,Client tar,Point p, Direction d);
     
     /** 
      * Add a {@link Client} at random location in the {@link Maze}. 

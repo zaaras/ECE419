@@ -98,6 +98,10 @@ public abstract class Client {
         
         /* Internals ******************************************************/        
         
+        public int spawX=0;
+        public int spawY=0;
+        public Direction spawDir = Direction.North;
+        
         /**
          * The maze where the client is located.  <code>null</code> if not
          * presently in a maze.

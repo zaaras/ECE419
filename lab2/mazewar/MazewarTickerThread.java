@@ -8,8 +8,10 @@ public class MazewarTickerThread extends Thread {
 			p.event = EchoPacket.TICK;
 			p.packet_id = MazewarServer.packet_count;
 			
+			
 			try {
 				MazewarServer.queue.put(p);
+				MazewarServer.maze.missleTick();
 			} catch (InterruptedException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();

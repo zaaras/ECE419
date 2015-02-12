@@ -29,6 +29,7 @@ public class EchoPacket implements Serializable {
 	public static final int DIS = 7;
 	public static final int TICK = 8;
 	public static final int LOC = 9;
+	public static final int KILL = 10;
 	
 
 	int event;
@@ -36,6 +37,7 @@ public class EchoPacket implements Serializable {
 	int x,y;
 	Direction dir;
 	String player;
+	String killer;
 	
 	int packet_id;
 	

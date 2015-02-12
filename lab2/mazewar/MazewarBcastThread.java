@@ -23,8 +23,6 @@ public class MazewarBcastThread extends Thread {
 
 		p = MazewarServer.queue.poll();
 
-		it = MazewarServer.client_list.iterator();
-
 		if (p != null) {
 
 			// send updates to client side
@@ -36,9 +34,12 @@ public class MazewarBcastThread extends Thread {
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
+					System.exit(1);
 				}
 
 			}
+			
+			it = MazewarServer.client_list.iterator();
 
 			// update client positions on server side
 			while (it.hasNext()) {
