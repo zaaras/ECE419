@@ -66,7 +66,7 @@ public class Mazewar extends JFrame {
 	 * The {@link GUIClient} for the game.
 	 */
 	// private GUIClient guiClient = null;
-	private RemoteClient localClient = null;
+	private static RemoteClient localClient = null;
 
 	/**
 	 * The panel that displays the {@link Maze}.
@@ -118,7 +118,7 @@ public class Mazewar extends JFrame {
 		// Put any network clean-up code you might have here.
 		// (inform other implementations on the network that you have
 		// left, etc.)
-
+		localClient.exitServer();
 		System.exit(0);
 	}
 
@@ -290,6 +290,10 @@ public class Mazewar extends JFrame {
 			try {
 				EchoPacket fromServer = (EchoPacket) clientConnection.in
 						.readObject();
+				
+				if(fromServer == null){
+					System.out.println("killed");
+				}
 				
 				//System.out.println(fromServer.player + " " + fromServer.event
 				//		+ " " + fromServer.type);
