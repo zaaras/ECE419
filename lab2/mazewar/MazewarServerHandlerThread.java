@@ -16,10 +16,6 @@ public class MazewarServerHandlerThread extends Thread {
 		System.out.println("Created new Thread to handle client");
 	}
 
-	public synchronized void increment() {
-		MazewarServer.packet_count++;
-	}
-
 	public void run() {
 		Iterator<GUIClient> it ;
 		serverClient temp = new serverClient();
@@ -33,7 +29,7 @@ public class MazewarServerHandlerThread extends Thread {
 			EchoPacket packetFromClient;			
 
 			while ((packetFromClient = (EchoPacket) fromClient.readObject()) != null) {
-				increment();				
+				MazewarServer.increment();			
 				packetFromClient.packet_id = MazewarServer.packet_count;
 				if(packetFromClient.event == EchoPacket.CONN){
 					handleMsg(packetFromClient);

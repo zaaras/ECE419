@@ -2,8 +2,11 @@ public class MazewarTickerThread extends Thread {
 	
 	public void run(){
 		while(true){
+			
+			MazewarServer.increment();			
 			EchoPacket p = new EchoPacket();		
 			p.event = EchoPacket.TICK;
+			p.packet_id = MazewarServer.packet_count;
 			
 			try {
 				MazewarServer.queue.put(p);
@@ -22,5 +25,4 @@ public class MazewarTickerThread extends Thread {
 		}
 		
 	}
-
 }

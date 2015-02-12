@@ -40,9 +40,7 @@ public class MazewarBcastThread extends Thread {
 		it = MazewarServer.client_list.iterator();
 		
 	    
-	    if(p!=null){
-		    //System.out.println(p.player + " " + p.event);
-		    
+	    if(p!=null){		    
 		    
 			//send updates to client side
 			for(int i = 0; i< MazewarServer.clients.size();i++){

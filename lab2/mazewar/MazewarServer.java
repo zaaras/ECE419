@@ -67,5 +67,9 @@ public class MazewarServer{
 
 		serverSocket.close();
 	}
+	
+	public static synchronized void increment() {
+		packet_count++;
+	}
 
 }
