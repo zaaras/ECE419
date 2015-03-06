@@ -22,11 +22,9 @@ import java.awt.GridBagLayout;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.Queue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
@@ -136,7 +134,7 @@ public class Mazewar extends JFrame {
 	private LinkedList<GUIClient> remoteClients = new LinkedList<GUIClient>();
 	public static int TOTAL_PLAYERS = 4;
 	private int playerCount = 0;
-	public static Queue<EchoPacket> que = new LinkedList<EchoPacket>();
+	public static LinkedBlockingQueue<EchoPacket> que = new LinkedBlockingQueue<EchoPacket>();
 
 	DatagramSocket dtSoc = null;
 	DatagramPacket dtPack = null;
@@ -311,10 +309,8 @@ public class Mazewar extends JFrame {
 
 				while (que.isEmpty());
 				fromServer = que.poll();
-				
-				System.out.println(fromServer.player);
 	
-				/*if (fromServer.event == EchoPacket.TICK) {
+				if (fromServer.event == EchoPacket.TICK) {
 					maze.missleTick();
 					continue;
 				}
@@ -375,7 +371,6 @@ public class Mazewar extends JFrame {
 				}
 
 				if (fromServer.player.equals(localClient.getName())) {
-					System.out.println("this is for me");
 					localClient.update(fromServer);
 
 				} else {
@@ -406,7 +401,7 @@ public class Mazewar extends JFrame {
 						}
 
 					}
-				}*/
+				}
 
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
