@@ -143,7 +143,7 @@ public class Mazewar extends JFrame {
 	InetAddress addr = null;
 	public static String IP = "224.2.2.2";
 	public static int PORT = 2222;
-	public static int PACKET_SIZE = 256;
+	public static int PACKET_SIZE = 2064;
 
 	public Mazewar() throws Exception {
 		super("ECE419 Mazewar");
@@ -287,6 +287,9 @@ public class Mazewar extends JFrame {
 
 		ClientQueManager quethread = new ClientQueManager();
 		quethread.start();
+		
+		DiscoveryThread discoThread = new DiscoveryThread(dtSoc,name);
+		discoThread.start();
 
 		/*
 		 * while(true){ EchoPacket fromServer = (EchoPacket) clientConnection.in
@@ -305,13 +308,11 @@ public class Mazewar extends JFrame {
 				 * System.out.println(fromServer.player + " " + fromServer.event
 				 * + " " + fromServer.type); }
 				 */
-				
-				localClient.toServerStr("hello all");
-				Thread.sleep(500);
 
 				while (que.isEmpty());
 				fromServer = que.poll();
 				
+				System.out.println(fromServer.player);
 	
 				/*if (fromServer.event == EchoPacket.TICK) {
 					maze.missleTick();
@@ -374,6 +375,7 @@ public class Mazewar extends JFrame {
 				}
 
 				if (fromServer.player.equals(localClient.getName())) {
+					System.out.println("this is for me");
 					localClient.update(fromServer);
 
 				} else {

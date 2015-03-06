@@ -9,14 +9,12 @@ import java.net.InetAddress;
 public class MazewarClient {
 
 	DatagramSocket echoSocket = null;
-	ByteArrayOutputStream byteOutStream = null;
-	ObjectOutput objOut = null;
+
 
 	public MazewarClient(DatagramSocket dtSoc, String name) throws Exception {
 
 		echoSocket = dtSoc;
-		byteOutStream = new ByteArrayOutputStream();
-		objOut = new ObjectOutputStream(byteOutStream);
+
 		// SendInit(name);
 		// SendMsg("Connected: " + name, name);
 
@@ -24,6 +22,9 @@ public class MazewarClient {
 
 	public void MultiCastPacket(EchoPacket pack) throws IOException {
 		byte[] buf;
+		ByteArrayOutputStream byteOutStream = new ByteArrayOutputStream();
+		ObjectOutput objOut = null;
+		objOut = new ObjectOutputStream(byteOutStream);
 		DatagramPacket outPack;
 		objOut.writeObject(pack);
 		buf = byteOutStream.toByteArray();

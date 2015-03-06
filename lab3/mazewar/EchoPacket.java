@@ -8,6 +8,7 @@ public class EchoPacket implements Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 	/* define packet formats */
+	// This goes into int type
 	public static final int ECHO_NULL    = 0;
 	public static final int ECHO_REQUEST = 100;
 	public static final int ECHO_MISSING = 101;
@@ -15,9 +16,11 @@ public class EchoPacket implements Serializable {
 	public static final int ECHO_REPLY   = 200;
 	public static final int ECHO_BYE     = 300;
 	public static final int SERVER_LOC   = 301;
+	public static final int DISCO   = 302;
 	
 	/* the packet payload */
 	/* initialized to be a null packet */
+	// This goes into int event
 	public int type = ECHO_NULL;
 	
 	public static final int UP = 1;	

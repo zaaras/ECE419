@@ -29,18 +29,19 @@ public class ClientQueManager extends Thread{
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		EchoPacket fromOthers ;//= (EchoPacket) myclient.in.readObject();
+		//= (EchoPacket) myclient.in.readObject();
 		while (true) {
 			try {
+				EchoPacket fromOthers;
 				inPacket = new DatagramPacket(inBuf, inBuf.length);
 				socket.receive(inPacket);
 				byteInputStream =  new ByteArrayInputStream(inBuf);
 				objIn = new ObjectInputStream(byteInputStream);
 				fromOthers = (EchoPacket) objIn.readObject();
-				
-				System.out.println("received: " + fromOthers.message +" Name: "+ fromOthers.player);
-				
 				Mazewar.que.add(fromOthers);
+
+				System.out.println(fromOthers.player + " says " + fromOthers.message );
+				
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
