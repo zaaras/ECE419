@@ -42,7 +42,7 @@ public class EchoPacket implements Serializable {
 	int packet_id;
 	
 	/* send your message here */
-	public String message;
+	String message;
 	
 	LinkedList<serverClient> serverClients;
 	

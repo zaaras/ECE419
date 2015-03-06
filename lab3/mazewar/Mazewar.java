@@ -19,6 +19,11 @@ USA.
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -132,9 +137,15 @@ public class Mazewar extends JFrame {
 	public static int TOTAL_PLAYERS = 4;
 	private int playerCount = 0;
 	public static Queue<EchoPacket> que = new LinkedList<EchoPacket>();
-	EchoPacket fromServerOutter = null;
 
-	public Mazewar() {
+	DatagramSocket dtSoc = null;
+	DatagramPacket dtPack = null;
+	InetAddress addr = null;
+	public static String IP = "224.2.2.2";
+	public static int PORT = 2222;
+	public static int PACKET_SIZE = 256;
+
+	public Mazewar() throws Exception {
 		super("ECE419 Mazewar");
 		consolePrintLn("ECE419 Mazewar started!");
 
@@ -149,26 +160,16 @@ public class Mazewar extends JFrame {
 		maze.addMazeListener(scoreModel);
 
 		// Throw up a dialog to get the GUIClient name.
-		String name = JOptionPane.showInputDialog("Enter your name");
+		String name = JOptionPane.showInputDialog("Enter your name, Dawgg!");
 		if ((name == null) || (name.length() == 0)) {
 			Mazewar.quit();
 		}
 
 		// You may want to put your network initialization code somewhere in
-		// here.
-		String[] args = new String[2];
+		dtSoc = new DatagramSocket();
+		addr = InetAddress.getByName(IP);
 
-		args[0] = "ug236.eecg.utoronto.ca";// "localhost";
-		//args[0] = "localhost";// "ug147.eecg.utoronto.ca";//"localhost";
-		args[1] = "1111";
-
-		try {
-			clientConnection = new MazewarClient(args, name);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			assert (false);
-		}
+		clientConnection = new MazewarClient(dtSoc, name);
 		assert (clientConnection != null);
 
 		localClient = new RemoteClient(name, clientConnection);
@@ -176,27 +177,9 @@ public class Mazewar extends JFrame {
 		serverClient temp;
 		int localx = 0, localy = 0;
 		Direction localdir = Direction.North;
-
-		try {
-
-			localClient.initServer();// sends init to server
-			fromServerOutter = (EchoPacket) clientConnection.in.readObject();
-			
-			while (fromServerOutter.player == null){
-				fromServerOutter = (EchoPacket) clientConnection.in.readObject();
-			}
-			
-			System.out.println(fromServerOutter.player);
-
-			while (!((fromServerOutter.player.equals(localClient.getName())) 
-					|| fromServerOutter.type != EchoPacket.SERVER_LOC)) {
-				
-				while ((fromServerOutter = (EchoPacket) clientConnection.in
-						.readObject()) == null);
-			}
-
-			it = fromServerOutter.serverClients.iterator();
-
+	
+		maze.addClient(localClient);
+/*
 			for (int i = 0; i < fromServerOutter.serverClients.size(); i++) {
 				temp = fromServerOutter.serverClients.get(i);
 				if (!temp.name.equals(localClient.getName())
@@ -216,12 +199,9 @@ public class Mazewar extends JFrame {
 				}
 			}
 
-		} catch (Exception e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		System.out.println("Adding with dir " + localdir);
+	
 		maze.addClient(localClient, new Point(localx, localy), localdir);
+*/		
 		this.addKeyListener(localClient);
 
 		// Create the GUIClient and connect it to the KeyListener queue
@@ -305,7 +285,7 @@ public class Mazewar extends JFrame {
 		Iterator<GUIClient> itgui;
 		GUIClient tempgui;
 
-		ClientQueManager quethread = new ClientQueManager(clientConnection);
+		ClientQueManager quethread = new ClientQueManager();
 		quethread.start();
 
 		/*
@@ -325,12 +305,15 @@ public class Mazewar extends JFrame {
 				 * System.out.println(fromServer.player + " " + fromServer.event
 				 * + " " + fromServer.type); }
 				 */
+				
+				localClient.toServerStr("hello all");
+				Thread.sleep(500);
 
-				while (que.isEmpty())
-					;
+				while (que.isEmpty());
 				fromServer = que.poll();
-
-				if (fromServer.event == EchoPacket.TICK) {
+				
+	
+				/*if (fromServer.event == EchoPacket.TICK) {
 					maze.missleTick();
 					continue;
 				}
@@ -421,7 +404,7 @@ public class Mazewar extends JFrame {
 						}
 
 					}
-				}
+				}*/
 
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
@@ -456,7 +439,12 @@ public class Mazewar extends JFrame {
 	public static void main(String args[]) {
 
 		/* Create the GUI */
-		new Mazewar();
+		try {
+			new Mazewar();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 	}
 }
