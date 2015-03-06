@@ -25,6 +25,7 @@ USA.
 
 public class Projectile {
 
+		boolean remove_flag;
         /**
          * The {@link Client} that owns this {@link Projectile}.
          */
@@ -38,6 +39,7 @@ public class Projectile {
         public Projectile(Client client) {
                 assert(client != null);
                 this.owner = client;
+                remove_flag = false;
         }
 
         /**

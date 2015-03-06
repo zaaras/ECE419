@@ -380,7 +380,9 @@ public class MazeImpl extends Maze implements Serializable, ClientListener,
 				while (it.hasNext()) {
 					Object o = it.next();
 					assert (o instanceof Projectile);
-					//if(!projectileMap.containsKey(o))
+					
+					// if this projectile hasn't already  been destroyed by another
+                    if (((Projectile)o).remove_flag == false)
 						deadPrj.addAll(moveProjectile((Projectile) o));
 				}
 				it = deadPrj.iterator();
@@ -413,6 +415,7 @@ public class MazeImpl extends Maze implements Serializable, ClientListener,
 			// If there is a wall, the projectile goes away.
 			cell.setContents(null);
 			deadPrj.add(prj);
+			prj.remove_flag = true;
 			update();
 			return deadPrj;
 		}
@@ -429,6 +432,7 @@ public class MazeImpl extends Maze implements Serializable, ClientListener,
 				killClient(prj.getOwner(), (Client) contents);
 				cell.setContents(null);
 				deadPrj.add(prj);
+				prj.remove_flag = true;
 				update();
 				return deadPrj;
 			} else {
@@ -438,6 +442,7 @@ public class MazeImpl extends Maze implements Serializable, ClientListener,
 				cell.setContents(null);
 				deadPrj.add(prj);
 				deadPrj.add(contents);
+				prj.remove_flag = true;
 				update();
 				return deadPrj;
 			}

@@ -25,6 +25,7 @@ USA.
 
 public class Projectile {
 
+		boolean remove_flag;
         /**
          * The {@link Client} that owns this {@link Projectile}.
          */
