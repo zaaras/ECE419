@@ -506,54 +506,60 @@ public class MazeImpl extends Maze implements Serializable, ClientListener,
 	public synchronized void killClient(Client source, Client target) {
 	
 
-		if(Mazewar.leader.equals(Mazewar.localClient.getName())){
-			assert (source != null);
-			assert (target != null);
-			Mazewar.consolePrintLn(source.getName() + " just vaporized "
-					+ target.getName());
-			Object o = clientMap.remove(target);
-			assert (o instanceof Point);
-			Point point = (Point) o;
-			CellImpl cell = getCellImpl(point);
-			cell.setContents(null);
-			// Pick a random starting point, and check to see if it is already
-			// occupied
-			//System.out.println("Killed " + target.getName());
-			
+		if(!Mazewar.leader.equals(Mazewar.localClient.getName()))
+			return;
+		
+		assert (source != null);
+		assert (target != null);
+		Mazewar.consolePrintLn(source.getName() + " just vaporized "
+				+ target.getName());
+		Object o = clientMap.remove(target);
+		assert (o instanceof Point);
+		Point point = (Point) o;
+		CellImpl cell = getCellImpl(point);
+		cell.setContents(null);
+		// Pick a random starting point, and check to see if it is already
+		// occupied
+		//System.out.println("Killed " + target.getName());
+		
+			point = new Point(randomGen.nextInt(maxX), randomGen.nextInt(maxY));
+			cell = getCellImpl(point);
+			// Repeat until we find an empty cell
+			while (cell.getContents() != null) {
 				point = new Point(randomGen.nextInt(maxX), randomGen.nextInt(maxY));
 				cell = getCellImpl(point);
-				// Repeat until we find an empty cell
-				while (cell.getContents() != null) {
-					point = new Point(randomGen.nextInt(maxX), randomGen.nextInt(maxY));
-					cell = getCellImpl(point);
-				}
-				Direction d = Direction.random();
-				while (cell.isWall(d)) {
-					d = Direction.random();
-				}
+			}
+			Direction d = Direction.random();
+			while (cell.isWall(d)) {
+				d = Direction.random();
+			}
+		
+		
+			EchoPacket killPack = new EchoPacket();
+			killPack.type = EchoPacket.KILL;
+			killPack.event = EchoPacket.KILL;
+			killPack.player = target.getName();
+			killPack.killer = source.getName();
+			killPack.dir = d;
+			killPack.x = point.getX();
+			killPack.y = point.getY();
+			Mazewar.localClient.sendKill(killPack);
+		
 			
-			
-				EchoPacket killPack = new EchoPacket();
-				killPack.type = EchoPacket.KILL;
-				killPack.event = EchoPacket.KILL;
-				killPack.player = target.getName();
-				killPack.killer = source.getName();
-				killPack.dir = d;
-				killPack.x = point.getX();
-				killPack.y = point.getY();
-				Mazewar.localClient.sendKill(killPack);
-			
+			cell.setContents(target);
+			clientMap.put(target, new DirectedPoint(point, d));
+			update();
+			notifyClientKilled(source, target);
 				
-				cell.setContents(target);
-				clientMap.put(target, new DirectedPoint(point, d));
-				update();
-				notifyClientKilled(source, target);
-				
-		}	
+		
 		
 	}
 	
 	public synchronized void killClient(Client source, Client target,Point pt, Direction dir) {
+		if(Mazewar.leader.equals(Mazewar.localClient.getName()))
+			return;
+		
+		
 		assert (source != null);
 		assert (target != null);
 		/*Mazewar.consolePrintLn(source.getName() + " just vaporized "

@@ -1,7 +1,8 @@
 public class MazewarTickerThread extends Thread {
 	
 	public void run(){
-		while(Mazewar.leader.equals(Mazewar.localClient.getName())){
+		while (true){
+			if(Mazewar.leader.equals(Mazewar.localClient.getName())){
 			
 			//MazewarServer.increment();			
 			//EchoPacket p = new EchoPacket();		
@@ -27,6 +28,7 @@ public class MazewarTickerThread extends Thread {
 			}
 			
 		}
+	}
 		
 	}
 }
