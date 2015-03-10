@@ -72,5 +72,25 @@ public class MazewarClient {
 		packetToServer.event = EchoPacket.ECHO_BYE;
 		MultiCastPacket(packetToServer);
 	}
+	
+	public void SendFreeze(String name) throws IOException {
+		EchoPacket packetToServer = new EchoPacket();
+		packetToServer.event = EchoPacket.FREEZE;
+		packetToServer.player = name;
+		packetToServer.message = "freeeze";
+		MultiCastPacket(packetToServer);
+	}
+
+	public void SendUnFreeze(String name, Point point, Direction direction) throws IOException {
+		EchoPacket packetToServer = new EchoPacket();
+		packetToServer.event = EchoPacket.UNFREEZE;
+		packetToServer.player = name;
+		packetToServer.x = point.getX();
+		packetToServer.y = point.getY();
+		packetToServer.dir = direction;
+		packetToServer.message = "unfreeeze";
+		MultiCastPacket(packetToServer);
+		
+	}
 
 }

@@ -14,6 +14,7 @@ public class DiscoveryThread extends Thread{
 	public DiscoveryThread(DatagramSocket dtSoc, String name) throws IOException {
 		echoSocket = dtSoc;
 		localName = name;
+
 	}
 	
 	public void MultiCastPacket(EchoPacket pack) throws IOException {
@@ -34,10 +35,14 @@ public class DiscoveryThread extends Thread{
 		discoPack.type = EchoPacket.DISCO;
 		discoPack.player = localName;
 		discoPack.message = "lets disco";
+
 		while (true) {
+			discoPack.x = Mazewar.localClient.getPoint().getX();
+			discoPack.y = Mazewar.localClient.getPoint().getY();
+			discoPack.dir = Mazewar.localClient.getOrientation();
 			try {
 				MultiCastPacket(discoPack);
-				Thread.sleep(1000);
+				Thread.sleep(300);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

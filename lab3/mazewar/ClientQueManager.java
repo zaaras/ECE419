@@ -39,7 +39,7 @@ public class ClientQueManager extends Thread{
 				objIn = new ObjectInputStream(byteInputStream);
 				fromOthers = (EchoPacket) objIn.readObject();
 				if(Mazewar.que.add(fromOthers));
-				//System.out.println(fromOthers.player + " says " + fromOthers.message );
+				System.out.println(fromOthers.player + " says " + fromOthers.message );
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

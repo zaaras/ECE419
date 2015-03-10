@@ -80,6 +80,26 @@ public class RemoteClient extends Client implements KeyListener {
 
 	}
 	
+	void sendFreeze() {
+		try {
+			socket.SendFreeze(name);
+		} catch (IOException e1) {
+			System.err.println("Sending event to server failed.");
+			e1.printStackTrace();
+		}
+	}
+	
+	
+	void sendUnFreeze(String string, Point point, Direction direction) {
+		try {
+			socket.SendUnFreeze(name, point, direction);
+		} catch (IOException e1) {
+			System.err.println("Sending event to server failed.");
+			e1.printStackTrace();
+		}
+	}
+	
+	
 	void initServer() {
 		try {
 			socket.SendInit(name);

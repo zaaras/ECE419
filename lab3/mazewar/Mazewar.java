@@ -70,7 +70,7 @@ public class Mazewar extends JFrame {
 	 * The {@link GUIClient} for the game.
 	 */
 	// private GUIClient guiClient = null;
-	private static RemoteClient localClient = null;
+	public static RemoteClient localClient = null;
 
 	/**
 	 * The panel that displays the {@link Maze}.
@@ -132,6 +132,7 @@ public class Mazewar extends JFrame {
 
 	private MazewarClient clientConnection = null;
 	private LinkedList<GUIClient> remoteClients = new LinkedList<GUIClient>();
+	private LinkedList<serverClient> tempClientList = new LinkedList<serverClient>();
 	public static int TOTAL_PLAYERS = 4;
 	private int playerCount = 0;
 	public static LinkedBlockingQueue<EchoPacket> que = new LinkedBlockingQueue<EchoPacket>();
@@ -142,6 +143,7 @@ public class Mazewar extends JFrame {
 	public static String IP = "224.2.2.2";
 	public static int PORT = 2222;
 	public static int PACKET_SIZE = 2064;
+	EchoPacket fromServerOutter;
 
 	public Mazewar() throws Exception {
 		super("ECE419 Mazewar");
@@ -173,10 +175,54 @@ public class Mazewar extends JFrame {
 		localClient = new RemoteClient(name, clientConnection);
 		Iterator<serverClient> it = null;
 		serverClient temp;
-		int localx = 0, localy = 0;
-		Direction localdir = Direction.North;
+		
+		ClientQueManager quethread = new ClientQueManager();
+		quethread.start();
+		int seconds = 0;
+		
+		localClient.sendFreeze();
+		
+		// listen for 2 seconds
+		while(true){
+			Thread.sleep(500);
+			
+			while(!que.isEmpty()){
+				fromServerOutter = que.poll();
+				if(fromServerOutter.type == EchoPacket.DISCO){
+					int pos = alreadyConnectedsc(tempClientList,fromServerOutter.player); 
+					System.out.println(pos);
+					if(pos != -1){
+						tempClientList.remove(pos);
+						System.out.println("removing");
+					}
+					tempClientList.add(new serverClient(fromServerOutter.player, fromServerOutter.x,fromServerOutter.y,fromServerOutter.dir));
+					
+				}
+			}
+			
+			seconds ++;
+			if(seconds == 4)
+				break;
+		}
+		
+		System.out.println(tempClientList.toString());
+		
+		Iterator<serverClient> tempListIterator = tempClientList.iterator();
+		
+		while(tempListIterator.hasNext()){
+			serverClient fromTempList = tempListIterator.next();
+			remoteClients.add(new GUIClient(fromTempList.name));
+			maze.addClient(remoteClients.getLast(), new Point(fromTempList.x,
+					fromTempList.y), fromTempList.dir);
+			playerCount++;
+
+		}
 	
 		maze.addClient(localClient);
+		
+		localClient.sendUnFreeze(localClient.getName(),localClient.getPoint(),localClient.getOrientation());
+		
+		
 /*
 			for (int i = 0; i < fromServerOutter.serverClients.size(); i++) {
 				temp = fromServerOutter.serverClients.get(i);
@@ -282,11 +328,8 @@ public class Mazewar extends JFrame {
 
 		Iterator<GUIClient> itgui;
 		GUIClient tempgui;
-
-		ClientQueManager quethread = new ClientQueManager();
-		quethread.start();
 		
-		DiscoveryThread discoThread = new DiscoveryThread(dtSoc,name);
+		DiscoveryThread discoThread = new DiscoveryThread(dtSoc, name);
 		discoThread.start();
 
 		/*
@@ -309,6 +352,23 @@ public class Mazewar extends JFrame {
 
 				while (que.isEmpty());
 				fromServer = que.poll();
+				
+				if(fromServer.event == EchoPacket.FREEZE ){
+					while (true){
+						if(!que.isEmpty()){
+							fromServer = que.poll();
+							if(fromServer.event == EchoPacket.UNFREEZE ){
+								remoteClients.add(new GUIClient(fromServer.player));
+								maze.addClient(remoteClients.get(playerCount),
+										new Point(fromServer.x, fromServer.y), fromServer.dir);
+								playerCount++;
+								break;
+							}
+
+						}
+					}
+					
+				}
 	
 				if (fromServer.event == EchoPacket.TICK) {
 					maze.missleTick();
@@ -425,6 +485,43 @@ public class Mazewar extends JFrame {
 		}
 
 		return false;
+	}
+	
+	private int alreadyConnected(LinkedList<GUIClient> rc,
+			String sclient) {
+
+		Iterator<GUIClient> it = rc.iterator();
+		GUIClient temp;
+		int index = -1;
+
+		while (it.hasNext()) {
+			temp = it.next();
+			if (temp.getName().equals(sclient)) {
+				return index;
+			}
+			index++;
+		}
+
+		return index;
+	}
+	
+	private int alreadyConnectedsc(LinkedList<serverClient> rc,
+			String sclient) {
+
+		Iterator<serverClient> it = rc.iterator();
+		serverClient temp;
+		int index = -1;
+
+		while (it.hasNext()) {
+			temp = it.next();
+			if (temp.name.equals(sclient)) {
+				index++;
+				return index;
+			}
+			index++;
+		}
+
+		return index;
 	}
 
 	/**

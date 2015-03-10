@@ -17,6 +17,7 @@ public class EchoPacket implements Serializable {
 	public static final int ECHO_BYE     = 300;
 	public static final int SERVER_LOC   = 301;
 	public static final int DISCO   = 302;
+
 	
 	/* the packet payload */
 	/* initialized to be a null packet */
@@ -33,6 +34,8 @@ public class EchoPacket implements Serializable {
 	public static final int TICK = 8;
 	public static final int LOC = 9;
 	public static final int KILL = 10;
+	public static final int FREEZE   = 11;
+	public static final int UNFREEZE   = 12;
 	
 
 	int event;
