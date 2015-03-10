@@ -5,9 +5,11 @@ import java.io.ObjectInputStream;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Map.Entry;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
@@ -24,6 +26,19 @@ public class ClientQueManager extends Thread {
 	public static HashMap<String, Integer> remoteQueCounts = new HashMap<String, Integer>();
 	public static int localCountQue = 0;
 
+	public static LinkedList<missingPacket> missingPacks = new LinkedList<missingPacket> ();
+	
+	private class missingPacket{
+		
+		public missingPacket(final int index, final String from){
+			missingPack = index;
+			missingFrom = from;
+		}
+		
+		int missingPack;
+		String missingFrom;
+	}
+	
 	public ClientQueManager() throws IOException {
 
 		socket = new MulticastSocket(Mazewar.PORT);
@@ -50,16 +65,17 @@ public class ClientQueManager extends Thread {
 				objIn = new ObjectInputStream(byteInputStream);
 				fromOthers = (EchoPacket) objIn.readObject();
 
-				if (Mazewar.que.add(fromOthers));
 			
+				if(fromOthers.event == EchoPacket.FREEZE || fromOthers.event == EchoPacket.UNFREEZE)
+					if (Mazewar.que.add(fromOthers));
 				
 				if(fromOthers.type == EchoPacket.DISCO)
 					continue;
 				
 				if (Mazewar.playerCount != 0) {
 
-					if (Mazewar.remoteClients.contains(new GUIClient(
-							fromOthers.player))
+					
+					if (Mazewar.alreadyConnected(Mazewar.remoteClients, fromOthers.player)
 							|| Mazewar.localClient.getName().equals(
 									fromOthers.player)) {
 
@@ -74,15 +90,38 @@ public class ClientQueManager extends Thread {
 										fromOthers.packet_id);
 							} else {
 								// Missed a package
-								requestMissingPacket(
-										fromOthers.player,
-										remoteQueCounts.get(fromOthers.player) + 1);
+								missingPacks.add(new missingPacket(remoteQueCounts.get(fromOthers.player) + 1, fromOthers.player));
+								
+								Iterator<missingPacket> missingIterator = missingPacks.iterator();
+								missingPacket missing;
+								while(missingIterator.hasNext()){
+									missing = missingIterator.next();
+									requestMissingPacket(missing.missingFrom,missing.missingPack);
+								}
+								
 							}
 
-							((Queue<EchoPacket>) remoteQues
-									.get(fromOthers.player)).add(fromOthers);
+						
+							PriorityQueue<EchoPacket> tempQue = remoteQues.get(fromOthers.player);
+							tempQue.add(fromOthers);
+							remoteQues.put(fromOthers.player, tempQue);
 							
-
+							Collection<Entry<String, PriorityQueue<EchoPacket>>> Pques = remoteQues.entrySet();
+							Iterator<Entry<String, PriorityQueue<EchoPacket>>> queIterator = Pques.iterator();
+							Entry<String, PriorityQueue<EchoPacket>> que;
+							EchoPacket packet;
+							
+							while(queIterator.hasNext()){
+								que = queIterator.next();
+							
+								if(missingPacks.isEmpty()){
+									if(que.getValue().peek()!=null){
+										packet = que.getValue().poll();
+										if (Mazewar.que.add(packet));
+									}
+								}
+								
+							}
 						}
 					}
 				}
@@ -100,6 +139,7 @@ public class ClientQueManager extends Thread {
 	private void requestMissingPacket(String player, int i) {
 		// TODO Auto-generated method stub
 		System.out.println("missing packet " + i + " from " + player);
+		Mazewar.localClient.sendMissingPack(player,i);
 
 	}
 }

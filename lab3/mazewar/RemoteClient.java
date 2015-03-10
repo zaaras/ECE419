@@ -196,6 +196,16 @@ public class RemoteClient extends Client implements KeyListener {
 		}*/
 	}
 
+	public void sendMissingPack(String from, int index) {
+		try {
+			socket.SendMissingPack(name, from, index);
+		} catch (IOException e1) {
+			System.err.println("Sending event to server failed.");
+			e1.printStackTrace();
+		}
+		
+	}
+
 
 
 

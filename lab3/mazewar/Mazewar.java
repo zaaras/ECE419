@@ -235,7 +235,8 @@ public class Mazewar extends JFrame {
 		PriorityQueue<EchoPacket> tempQue = new PriorityQueue<EchoPacket>(queCapacity,packComparator);
 		ClientQueManager.remoteQues.put(Mazewar.localClient.getName(), tempQue);
 		ClientQueManager.remoteQueCounts.put(Mazewar.localClient.getName(), -1);
-		//playerCount++;
+		playerCount++;
+		ClientQueManager.localCountQue++;
 		
 		localClient.sendUnFreeze(localClient.getName(),localClient.getPoint(),localClient.getOrientation());
 	
@@ -386,7 +387,7 @@ public class Mazewar extends JFrame {
 							fromServer = que.poll();
 							if(fromServer.event == EchoPacket.UNFREEZE ){
 								remoteClients.add(new GUIClient(fromServer.player));
-								maze.addClient(remoteClients.get(playerCount),
+								maze.addClient(remoteClients.get(playerCount-1),
 										new Point(fromServer.x, fromServer.y), fromServer.dir);
 								playerCount++;
 								
@@ -521,7 +522,7 @@ public class Mazewar extends JFrame {
 		}
 	}
 
-	private boolean alreadyConnected(LinkedList<GUIClient> rc,
+	public boolean alreadyConnected(LinkedList<GUIClient> rc,
 			serverClient sclient) {
 
 		Iterator<GUIClient> it = rc.iterator();
@@ -537,22 +538,20 @@ public class Mazewar extends JFrame {
 		return false;
 	}
 	
-	private int alreadyConnected(LinkedList<GUIClient> rc,
+	public static boolean alreadyConnected(LinkedList<GUIClient> rc,
 			String sclient) {
 
 		Iterator<GUIClient> it = rc.iterator();
 		GUIClient temp;
-		int index = -1;
 
 		while (it.hasNext()) {
 			temp = it.next();
 			if (temp.getName().equals(sclient)) {
-				return index;
+				return true;
 			}
-			index++;
 		}
 
-		return index;
+		return false;
 	}
 	
 	private int alreadyConnectedsc(LinkedList<serverClient> rc,

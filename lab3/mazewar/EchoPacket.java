@@ -18,6 +18,7 @@ public class EchoPacket implements Serializable {
 	public static final int SERVER_LOC   = 301;
 	public static final int DISCO   = 302;
 	public static final int LEADER   = 303;
+	public static final int REQUEST_MISSING   = 305;
 
 	
 	/* the packet payload */
@@ -42,10 +43,12 @@ public class EchoPacket implements Serializable {
 	int event;
 	int playerCount;
 	int x,y;
+	int missingIndex ;
 	Direction dir;
 	String player;
 	String killer;
 	String leader;
+	String missingPackOwner;
 	
 	int packet_id;
 	
