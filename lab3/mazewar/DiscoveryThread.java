@@ -42,7 +42,7 @@ public class DiscoveryThread extends Thread{
 			discoPack.dir = Mazewar.localClient.getOrientation();
 			try {
 				MultiCastPacket(discoPack);
-				Thread.sleep(300);
+				Thread.sleep(1000);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

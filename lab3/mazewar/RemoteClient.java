@@ -99,6 +99,15 @@ public class RemoteClient extends Client implements KeyListener {
 		}
 	}
 	
+	public void sendKill(EchoPacket killPack) {
+		try {
+			socket.SendKill(name,killPack);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
 	
 	void initServer() {
 		try {
@@ -130,6 +139,15 @@ public class RemoteClient extends Client implements KeyListener {
 	void toServerStr(String msg) {
 		try {
 			socket.SendMsg(msg, name);
+		} catch (IOException e1) {
+			System.err.println("Sending event to server failed.");
+			e1.printStackTrace();
+		}
+	}
+	
+	public void sendTick() {
+		try {
+			socket.SendTick(name);
 		} catch (IOException e1) {
 			System.err.println("Sending event to server failed.");
 			e1.printStackTrace();
@@ -177,6 +195,10 @@ public class RemoteClient extends Client implements KeyListener {
 			/*
 		}*/
 	}
+
+
+
+
 
 
 	/*private void requestPacket(Integer id) {

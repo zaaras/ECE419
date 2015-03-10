@@ -131,7 +131,7 @@ public class Mazewar extends JFrame {
 	 */
 
 	private MazewarClient clientConnection = null;
-	private LinkedList<GUIClient> remoteClients = new LinkedList<GUIClient>();
+	public static LinkedList<GUIClient> remoteClients = new LinkedList<GUIClient>();
 	private LinkedList<serverClient> tempClientList = new LinkedList<serverClient>();
 	public static int TOTAL_PLAYERS = 4;
 	private int playerCount = 0;
@@ -143,6 +143,7 @@ public class Mazewar extends JFrame {
 	public static String IP = "224.2.2.2";
 	public static int PORT = 2222;
 	public static int PACKET_SIZE = 2064;
+	public volatile static String leader = null;
 	EchoPacket fromServerOutter;
 
 	public Mazewar() throws Exception {
@@ -178,6 +179,8 @@ public class Mazewar extends JFrame {
 		
 		ClientQueManager quethread = new ClientQueManager();
 		quethread.start();
+		
+
 		int seconds = 0;
 		
 		localClient.sendFreeze();
@@ -189,14 +192,8 @@ public class Mazewar extends JFrame {
 			while(!que.isEmpty()){
 				fromServerOutter = que.poll();
 				if(fromServerOutter.type == EchoPacket.DISCO){
-					int pos = alreadyConnectedsc(tempClientList,fromServerOutter.player); 
-					System.out.println(pos);
-					if(pos != -1){
-						tempClientList.remove(pos);
-						System.out.println("removing");
-					}
+					remove(tempClientList,fromServerOutter.player); 
 					tempClientList.add(new serverClient(fromServerOutter.player, fromServerOutter.x,fromServerOutter.y,fromServerOutter.dir));
-					
 				}
 			}
 			
@@ -221,7 +218,7 @@ public class Mazewar extends JFrame {
 		maze.addClient(localClient);
 		
 		localClient.sendUnFreeze(localClient.getName(),localClient.getPoint(),localClient.getOrientation());
-		
+	
 		
 /*
 			for (int i = 0; i < fromServerOutter.serverClients.size(); i++) {
@@ -331,6 +328,15 @@ public class Mazewar extends JFrame {
 		
 		DiscoveryThread discoThread = new DiscoveryThread(dtSoc, name);
 		discoThread.start();
+		
+		LeaderElection electionThread = new LeaderElection();
+		electionThread.start();
+		
+		while(leader==null);
+		
+		MazewarTickerThread Ticker = new MazewarTickerThread();
+		Ticker.start();
+		
 
 		/*
 		 * while(true){ EchoPacket fromServer = (EchoPacket) clientConnection.in
@@ -376,6 +382,9 @@ public class Mazewar extends JFrame {
 				}
 
 				if (fromServer.type == EchoPacket.KILL) {
+					
+					System.out.println("KILL: ------ Packet");
+					
 					Iterator<GUIClient> itremote;
 					Client src = null, tar = null, tempremote;
 
@@ -417,14 +426,12 @@ public class Mazewar extends JFrame {
 					Iterator<GUIClient> itremote;
 					Client tempremote;
 					itremote = remoteClients.iterator();
-					System.out.println(remoteClients.size());
 					while (itremote.hasNext()) {
 						tempremote = itremote.next();
 						if (tempremote.getName().equals(fromServer.player)) {
 							maze.removeClient(tempremote);
 							itremote.remove();
 							playerCount--;
-							System.out.println(remoteClients.size());
 						}
 					}
 
@@ -516,6 +523,26 @@ public class Mazewar extends JFrame {
 			temp = it.next();
 			if (temp.name.equals(sclient)) {
 				index++;
+				return index;
+			}
+			index++;
+		}
+
+		return index;
+	}
+	
+	private int remove(LinkedList<serverClient> rc,
+			String sclient) {
+
+		Iterator<serverClient> it = rc.iterator();
+		serverClient temp;
+		int index = -1;
+
+		while (it.hasNext()) {
+			temp = it.next();	
+			if (temp.name.equals(sclient)) {
+				index++;
+				it.remove();
 				return index;
 			}
 			index++;

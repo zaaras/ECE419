@@ -80,6 +80,15 @@ public class MazewarClient {
 		packetToServer.message = "freeeze";
 		MultiCastPacket(packetToServer);
 	}
+	
+	public void SendLeader(String name, String Leader) throws IOException {
+		EchoPacket packetToServer = new EchoPacket();
+		packetToServer.event = EchoPacket.LEADER;
+		packetToServer.player = name;
+		packetToServer.leader = Leader;
+		MultiCastPacket(packetToServer);
+	}
+
 
 	public void SendUnFreeze(String name, Point point, Direction direction) throws IOException {
 		EchoPacket packetToServer = new EchoPacket();
@@ -91,6 +100,18 @@ public class MazewarClient {
 		packetToServer.message = "unfreeeze";
 		MultiCastPacket(packetToServer);
 		
+	}
+
+	public void SendTick(String name) throws IOException {
+		EchoPacket packetToServer = new EchoPacket();
+		packetToServer.event = EchoPacket.TICK;
+		packetToServer.player = name;
+		packetToServer.message = "tic";
+		MultiCastPacket(packetToServer);
+	}
+
+	public void SendKill(String name, EchoPacket killPack) throws IOException {
+		MultiCastPacket(killPack);
 	}
 
 }

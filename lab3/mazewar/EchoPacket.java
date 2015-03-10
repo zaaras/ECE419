@@ -17,6 +17,7 @@ public class EchoPacket implements Serializable {
 	public static final int ECHO_BYE     = 300;
 	public static final int SERVER_LOC   = 301;
 	public static final int DISCO   = 302;
+	public static final int LEADER   = 303;
 
 	
 	/* the packet payload */
@@ -44,6 +45,7 @@ public class EchoPacket implements Serializable {
 	Direction dir;
 	String player;
 	String killer;
+	String leader;
 	
 	int packet_id;
 	
