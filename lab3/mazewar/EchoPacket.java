@@ -19,6 +19,7 @@ public class EchoPacket implements Serializable {
 	public static final int DISCO   = 302;
 	public static final int LEADER   = 303;
 	public static final int REQUEST_MISSING   = 305;
+	public static final int RESPONSE_MISSING   = 306;
 
 	
 	/* the packet payload */

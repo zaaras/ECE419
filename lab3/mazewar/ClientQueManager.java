@@ -65,7 +65,13 @@ public class ClientQueManager extends Thread {
 				objIn = new ObjectInputStream(byteInputStream);
 				fromOthers = (EchoPacket) objIn.readObject();
 
-			
+				if(fromOthers.type == EchoPacket.RESPONSE_MISSING){
+					lookupRemove(fromOthers.packet_id);
+					PriorityQueue<EchoPacket> tempQue = remoteQues.get(fromOthers.player);
+					tempQue.add(fromOthers);
+					remoteQues.put(fromOthers.player, tempQue);
+				}
+				
 				if(fromOthers.event == EchoPacket.FREEZE || fromOthers.event == EchoPacket.UNFREEZE)
 					if (Mazewar.que.add(fromOthers));
 				
@@ -132,6 +138,17 @@ public class ClientQueManager extends Thread {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 				System.exit(1);
+			}
+		}
+	}
+
+	private void lookupRemove(int packet_id) {
+		Iterator<missingPacket> it = missingPacks.iterator();
+		while(it.hasNext()){
+			missingPacket tmp = it.next();
+			if(tmp.missingPack == packet_id){
+				it.remove();
+				
 			}
 		}
 	}
