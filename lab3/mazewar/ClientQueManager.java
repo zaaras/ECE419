@@ -138,7 +138,7 @@ public class ClientQueManager extends Thread {
 
 	private void requestMissingPacket(String player, int i) {
 		// TODO Auto-generated method stub
-		System.out.println("missing packet " + i + " from " + player);
+		//System.out.println("missing packet " + i + " from " + player);
 		Mazewar.localClient.sendMissingPack(player,i);
 
 	}

@@ -381,6 +381,10 @@ public class Mazewar extends JFrame {
 				while (que.isEmpty());
 				fromServer = que.poll();
 				
+				if(fromServer.type == EchoPacket.REQUEST_MISSING && fromServer.missingPackOwner.equals(localClient.getName())){
+					localClient.sendPack(lookupIndex(MazewarClient.sentPackets, fromServer.missingIndex));
+				}
+				
 				if(fromServer.event == EchoPacket.FREEZE ){
 					while (true){
 						if(!que.isEmpty()){
@@ -520,6 +524,26 @@ public class Mazewar extends JFrame {
 				System.exit(1);
 			}
 		}
+	}
+
+	private EchoPacket lookupIndex(LinkedList<EchoPacket> sentPackets,
+			int missingIndex) {
+		
+		Iterator<EchoPacket> it = sentPackets.iterator();
+		EchoPacket tmp;
+		
+		while(it.hasNext()){
+			
+			tmp = it.next();
+			
+			if(tmp.packet_id == missingIndex){
+				return tmp;
+			}
+			
+			
+		}
+		return null;
+		
 	}
 
 	public boolean alreadyConnected(LinkedList<GUIClient> rc,

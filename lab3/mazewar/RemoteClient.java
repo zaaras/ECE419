@@ -206,6 +206,16 @@ public class RemoteClient extends Client implements KeyListener {
 		
 	}
 
+	public void sendPack(EchoPacket pack) {
+		try {
+			socket.SendPack(name,pack);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+
 
 
 

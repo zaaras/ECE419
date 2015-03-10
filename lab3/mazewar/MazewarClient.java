@@ -10,7 +10,7 @@ import java.util.LinkedList;
 public class MazewarClient {
 
 	DatagramSocket echoSocket = null;
-	LinkedList<EchoPacket> sentPackets = new LinkedList<EchoPacket>();
+	public static LinkedList<EchoPacket> sentPackets = new LinkedList<EchoPacket>();
 
 
 	public MazewarClient(DatagramSocket dtSoc, String name) throws Exception {
@@ -28,7 +28,7 @@ public class MazewarClient {
 		pack.packet_id = Mazewar.packetCount;
 		sentPackets.add(pack);
 		if(sentPackets.size()>100){
-			sentPackets.remove();
+			;//sentPackets.remove();
 		}
 		if(pack.type != EchoPacket.DISCO)
 			Mazewar.packetCount++;
@@ -126,12 +126,17 @@ public class MazewarClient {
 
 	public void SendMissingPack(String name, String from, int index) throws IOException {
 		EchoPacket packetToServer = new EchoPacket();
-		packetToServer.event = EchoPacket.REQUEST_MISSING;
+		packetToServer.type = EchoPacket.REQUEST_MISSING;
 		packetToServer.player = name;
 		packetToServer.missingPackOwner = from;
 		packetToServer.missingIndex = index;
 		packetToServer.message = "missing";
 		MultiCastPacket(packetToServer);
+		
+	}
+
+	public void SendPack(String name, EchoPacket pack) throws IOException {
+		MultiCastPacket(pack);
 		
 	}
 
