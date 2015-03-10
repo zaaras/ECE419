@@ -24,7 +24,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.Queue;
+import java.util.PriorityQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.swing.BorderFactory;
@@ -148,6 +148,9 @@ public class Mazewar extends JFrame {
 	public static int PACKET_SIZE = 2064;
 	public volatile static String leader = null;
 	EchoPacket fromServerOutter;
+	int queCapacity = 10; 
+	
+	EchoPacketComparator packComparator = new EchoPacketComparator();
 
 	public Mazewar() throws Exception {
 		super("ECE419 Mazewar");
@@ -221,7 +224,7 @@ public class Mazewar extends JFrame {
 					fromTempList.y), fromTempList.dir);
 			playerCount++;
 			
-			Queue<EchoPacket> que = new LinkedList<EchoPacket>();
+			PriorityQueue<EchoPacket> que = new PriorityQueue<EchoPacket>(queCapacity,packComparator);
 			ClientQueManager.remoteQues.put(remoteClients.getLast().getName(), que);
 			ClientQueManager.remoteQueCounts.put(remoteClients.getLast().getName(), -1);
 			ClientQueManager.localCountQue++;
@@ -229,7 +232,7 @@ public class Mazewar extends JFrame {
 		}
 	
 		maze.addClient(localClient);
-		Queue<EchoPacket> tempQue = new LinkedList<EchoPacket>();
+		PriorityQueue<EchoPacket> tempQue = new PriorityQueue<EchoPacket>(queCapacity,packComparator);
 		ClientQueManager.remoteQues.put(Mazewar.localClient.getName(), tempQue);
 		ClientQueManager.remoteQueCounts.put(Mazewar.localClient.getName(), -1);
 		//playerCount++;
@@ -388,12 +391,12 @@ public class Mazewar extends JFrame {
 								playerCount++;
 								
 								
-								Queue<EchoPacket> que = new LinkedList<EchoPacket>();
+								PriorityQueue<EchoPacket> que = new PriorityQueue<EchoPacket>(queCapacity,packComparator);
 								ClientQueManager.remoteQues.put(fromServer.player, que);
 								ClientQueManager.remoteQueCounts.put(fromServer.player,
 										fromServer.packet_id);
 								ClientQueManager.localCountQue++;
-								que = ((Queue<EchoPacket>) ClientQueManager.remoteQues
+								que = ((PriorityQueue<EchoPacket>) ClientQueManager.remoteQues
 										.get(fromServer.player));
 								que.add(fromServer);
 								ClientQueManager.remoteQues.put(fromServer.player, que);

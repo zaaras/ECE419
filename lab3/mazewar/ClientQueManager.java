@@ -8,6 +8,7 @@ import java.net.MulticastSocket;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.PriorityQueue;
 import java.util.Queue;
 
 public class ClientQueManager extends Thread {
@@ -19,7 +20,7 @@ public class ClientQueManager extends Thread {
 	ByteArrayInputStream byteInputStream;
 	byte[] inBuf = new byte[Mazewar.PACKET_SIZE];
 
-	public static HashMap<String, Queue<EchoPacket>> remoteQues = new HashMap<String, Queue<EchoPacket>>();
+	public static HashMap<String, PriorityQueue<EchoPacket>> remoteQues = new HashMap<String, PriorityQueue<EchoPacket>>();
 	public static HashMap<String, Integer> remoteQueCounts = new HashMap<String, Integer>();
 	public static int localCountQue = 0;
 
@@ -50,6 +51,7 @@ public class ClientQueManager extends Thread {
 				fromOthers = (EchoPacket) objIn.readObject();
 
 				if (Mazewar.que.add(fromOthers));
+			
 				
 				if(fromOthers.type == EchoPacket.DISCO)
 					continue;
@@ -79,6 +81,7 @@ public class ClientQueManager extends Thread {
 
 							((Queue<EchoPacket>) remoteQues
 									.get(fromOthers.player)).add(fromOthers);
+							
 
 						}
 					}
