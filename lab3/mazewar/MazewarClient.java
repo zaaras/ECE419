@@ -23,6 +23,11 @@ public class MazewarClient {
 	public void MultiCastPacket(EchoPacket pack) throws IOException {
 		byte[] buf;
 		ByteArrayOutputStream byteOutStream = new ByteArrayOutputStream();
+		pack.packet_id = Mazewar.packetCount;
+		if(pack.type != EchoPacket.DISCO)
+			Mazewar.packetCount++;
+		
+		//System.out.println(Mazewar.packetCount);
 		ObjectOutput objOut = null;
 		objOut = new ObjectOutputStream(byteOutStream);
 		DatagramPacket outPack;
