@@ -104,8 +104,7 @@ public class ClientQueManager extends Thread {
 									fromOthers.player)) {
 
 						if (remoteQueCounts.get(fromOthers.player) == -1) {
-							remoteQueCounts.put(fromOthers.player,
-									fromOthers.packet_id);
+							remoteQueCounts.put(fromOthers.player,	fromOthers.packet_id);
 						} //else {
 							
 							PriorityQueue<EchoPacket> tempQue = remoteQues.get(fromOthers.player);
@@ -129,6 +128,7 @@ public class ClientQueManager extends Thread {
 									missing = missingIterator.next();
 									requestMissingPacket(missing.missingFrom,missing.missingPack);
 								}
+								System.exit(1);
 								
 							}
 
@@ -147,7 +147,7 @@ public class ClientQueManager extends Thread {
 									//System.out.println("missing packs in empty");
 									if(que.getValue().peek()!=null){
 										packet = que.getValue().poll();
-										remoteQueCounts.put(fromOthers.player,	packet.packet_id + 1);
+										remoteQueCounts.put(packet.player,	packet.packet_id + 1);
 										if (Mazewar.que.add(packet));
 									}
 								}
