@@ -65,7 +65,7 @@ public class ClientQueManager extends Thread {
 				objIn = new ObjectInputStream(byteInputStream);
 				fromOthers = (EchoPacket) objIn.readObject();
 
-				//System.out.println("Type: " + fromOthers.message);
+				System.out.println("Type: " + fromOthers.message);
 				
 
 				if(fromOthers.type == EchoPacket.REQUEST_MISSING && fromOthers.missingPackOwner.equals(Mazewar.localClient.getName())){
@@ -107,13 +107,13 @@ public class ClientQueManager extends Thread {
 						} else {
 
 							//if (remoteQueCounts.get(fromOthers.player) + 1 == fromOthers.packet_id) {
-							int pack = checkQue(fromOthers.player);
+							int pack = checkQue(fromOthers.player, remoteQueCounts.get(fromOthers.player));
 							if (pack==-1) {								
 								// This is the expected msg
 								;
 							} else {
 								// Missed a package
-								System.out.println("Missing pack from " + fromOthers.player);
+								System.out.println("Missing pack from " + fromOthers.player + " " + pack );
 								//missingPacks.add(new missingPacket(remoteQueCounts.get(fromOthers.player) + 1, fromOthers.player));
 								missingPacks.add(new missingPacket(pack, fromOthers.player));
 								
@@ -126,7 +126,7 @@ public class ClientQueManager extends Thread {
 								
 							}
 
-							remoteQueCounts.put(fromOthers.player, fromOthers.packet_id);
+							//remoteQueCounts.put(fromOthers.player, fromOthers.packet_id);
 							PriorityQueue<EchoPacket> tempQue = remoteQues.get(fromOthers.player);
 							tempQue.add(fromOthers);
 							remoteQues.put(fromOthers.player, tempQue);
@@ -140,6 +140,7 @@ public class ClientQueManager extends Thread {
 								que = queIterator.next();
 							
 								if(missingPacks.isEmpty()){
+									System.out.println("missing packs in empty");
 									if(que.getValue().peek()!=null){
 										packet = que.getValue().poll();
 										if (Mazewar.que.add(packet));
@@ -161,11 +162,11 @@ public class ClientQueManager extends Thread {
 		}
 	}
 
-	private synchronized int checkQue(String player) {
+	private synchronized int checkQue(String player, int startPoint) {
 		// TODO Auto-generated method stub
 		PriorityQueue<EchoPacket> searchq = remoteQues.get(player);
 		Iterator<EchoPacket> Packiterator = searchq.iterator();
-		int count = 0;
+		int count = startPoint;
 		EchoPacket pack;
 		while(Packiterator.hasNext()){
 			pack = Packiterator.next();
