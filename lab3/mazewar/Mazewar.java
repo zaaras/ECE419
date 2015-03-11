@@ -395,8 +395,7 @@ public class Mazewar extends JFrame {
 								
 								PriorityQueue<EchoPacket> que = new PriorityQueue<EchoPacket>(queCapacity,packComparator);
 								ClientQueManager.remoteQues.put(fromServer.player, que);
-								ClientQueManager.remoteQueCounts.put(fromServer.player,
-										fromServer.packet_id);
+								ClientQueManager.remoteQueCounts.put(fromServer.player,-1);
 								ClientQueManager.localCountQue++;
 								que = ((PriorityQueue<EchoPacket>) ClientQueManager.remoteQues
 										.get(fromServer.player));

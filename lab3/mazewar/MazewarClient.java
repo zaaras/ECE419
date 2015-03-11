@@ -30,8 +30,11 @@ public class MazewarClient {
 		if(sentPackets.size()>100){
 			;//sentPackets.remove();
 		}
-		if(pack.type != EchoPacket.DISCO)
+		if(pack.type == EchoPacket.DISCO  || pack.type == EchoPacket.FREEZE || pack.type == EchoPacket.UNFREEZE){
+			;
+		}else{
 			Mazewar.packetCount++;
+		}
 		
 		ObjectOutput objOut = null;
 		objOut = new ObjectOutputStream(byteOutStream);

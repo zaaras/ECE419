@@ -65,7 +65,7 @@ public class ClientQueManager extends Thread {
 				objIn = new ObjectInputStream(byteInputStream);
 				fromOthers = (EchoPacket) objIn.readObject();
 
-				System.out.println("Type: " + fromOthers.message);
+				System.out.println("Type: " + fromOthers.message + " " + fromOthers.packet_id);
 				
 
 				if(fromOthers.type == EchoPacket.REQUEST_MISSING && fromOthers.missingPackOwner.equals(Mazewar.localClient.getName())){
@@ -88,8 +88,10 @@ public class ClientQueManager extends Thread {
 					remoteQues.put(fromOthers.player, tempQue);
 				}
 				
-				if(fromOthers.event == EchoPacket.FREEZE || fromOthers.event == EchoPacket.UNFREEZE )
+				if(fromOthers.event == EchoPacket.FREEZE || fromOthers.event == EchoPacket.UNFREEZE ){
 					if (Mazewar.que.add(fromOthers));
+					continue; // We added this <-------------------------------
+				}
 				
 				if(fromOthers.type == EchoPacket.DISCO)
 					continue;
@@ -104,13 +106,17 @@ public class ClientQueManager extends Thread {
 						if (remoteQueCounts.get(fromOthers.player) == -1) {
 							remoteQueCounts.put(fromOthers.player,
 									fromOthers.packet_id);
-						} else {
+						} //else {
+							
+							PriorityQueue<EchoPacket> tempQue = remoteQues.get(fromOthers.player);
+							tempQue.add(fromOthers);
+							remoteQues.put(fromOthers.player, tempQue);
 
 							//if (remoteQueCounts.get(fromOthers.player) + 1 == fromOthers.packet_id) {
 							int pack = checkQue(fromOthers.player, remoteQueCounts.get(fromOthers.player));
 							if (pack==-1) {								
 								// This is the expected msg
-								;
+								
 							} else {
 								// Missed a package
 								System.out.println("Missing pack from " + fromOthers.player + " " + pack );
@@ -127,9 +133,7 @@ public class ClientQueManager extends Thread {
 							}
 
 							//remoteQueCounts.put(fromOthers.player, fromOthers.packet_id);
-							PriorityQueue<EchoPacket> tempQue = remoteQues.get(fromOthers.player);
-							tempQue.add(fromOthers);
-							remoteQues.put(fromOthers.player, tempQue);
+							
 							
 							Collection<Entry<String, PriorityQueue<EchoPacket>>> Pques = remoteQues.entrySet();
 							Iterator<Entry<String, PriorityQueue<EchoPacket>>> queIterator = Pques.iterator();
@@ -140,15 +144,16 @@ public class ClientQueManager extends Thread {
 								que = queIterator.next();
 							
 								if(missingPacks.isEmpty()){
-									System.out.println("missing packs in empty");
+									//System.out.println("missing packs in empty");
 									if(que.getValue().peek()!=null){
 										packet = que.getValue().poll();
+										remoteQueCounts.put(fromOthers.player,	packet.packet_id + 1);
 										if (Mazewar.que.add(packet));
 									}
 								}
 								
 							}
-						}
+						//}
 					}
 				}
 
