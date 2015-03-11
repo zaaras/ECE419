@@ -117,7 +117,8 @@ public class ClientQueManager extends Thread {
 
 						
 						
-						if(fromOthers.event == EchoPacket.TICK){
+						if(fromOthers.event == EchoPacket.TICK && Mazewar.leader != null){
+							
 							if(Mazewar.leader.equals(fromOthers.player)){
 								PriorityQueue<EchoPacket> tempQue = remoteQues
 										.get(fromOthers.player);
