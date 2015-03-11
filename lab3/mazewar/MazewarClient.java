@@ -26,7 +26,9 @@ public class MazewarClient {
 		byte[] buf;
 		ByteArrayOutputStream byteOutStream = new ByteArrayOutputStream();
 		pack.packet_id = Mazewar.packetCount;
+		pack.player = Mazewar.localClient.getName();
 		sentPackets.add(pack);
+		
 		if(sentPackets.size()>100){
 			;//sentPackets.remove();
 		}

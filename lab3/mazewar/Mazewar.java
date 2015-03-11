@@ -437,7 +437,7 @@ public class Mazewar extends JFrame {
 
 					assert (src != null);
 
-					if (localClient.getName().equals(fromServer.player)) {
+					if (localClient.getName().equals(fromServer.victim)) {
 						tar = localClient;
 						maze.killClient(src, tar, new Point(fromServer.x,
 								fromServer.y), fromServer.dir);
@@ -445,7 +445,7 @@ public class Mazewar extends JFrame {
 						itremote = remoteClients.iterator();
 						while (itremote.hasNext()) {
 							tempremote = itremote.next();
-							if (tempremote.getName().equals(fromServer.player)) {
+							if (tempremote.getName().equals(fromServer.victim)) {
 								tar = tempremote;
 								maze.killClient(src, tar, new Point(
 										fromServer.x, fromServer.y),

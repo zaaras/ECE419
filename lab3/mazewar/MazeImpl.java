@@ -538,7 +538,8 @@ public class MazeImpl extends Maze implements Serializable, ClientListener,
 			EchoPacket killPack = new EchoPacket();
 			killPack.type = EchoPacket.KILL;
 			killPack.event = EchoPacket.KILL;
-			killPack.player = target.getName();
+			killPack.player = Mazewar.localClient.getName();
+			killPack.victim = target.getName();
 			killPack.killer = source.getName();
 			killPack.dir = d;
 			killPack.x = point.getX();

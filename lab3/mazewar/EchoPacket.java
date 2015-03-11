@@ -13,6 +13,7 @@ public class EchoPacket implements Serializable {
 		this.x = in.x;
 		this.y = in.y;
 		this.missingIndex = in.missingIndex;
+		this.victim = in.victim;
 		this.dir = in.dir;
 		this.player = in.player;
 		this.killer = in.killer;
@@ -72,6 +73,7 @@ public class EchoPacket implements Serializable {
 	Direction dir;
 	String player;
 	String killer;
+	String victim;
 	String leader;
 	String missingPackOwner;
 	
