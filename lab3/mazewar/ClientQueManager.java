@@ -117,20 +117,12 @@ public class ClientQueManager extends Thread {
 
 						
 						
-						if(fromOthers.event == EchoPacket.TICK && Mazewar.leader != null){
-							
-							if(Mazewar.leader.equals(fromOthers.player)){
-								PriorityQueue<EchoPacket> tempQue = remoteQues
-										.get(fromOthers.player);
-								tempQue.add(fromOthers);
-								remoteQues.put(fromOthers.player, tempQue);
-							}
-						}else{
+
 							PriorityQueue<EchoPacket> tempQue = remoteQues
 									.get(fromOthers.player);
 							tempQue.add(fromOthers);
 							remoteQues.put(fromOthers.player, tempQue);
-						}
+						
 						
 
 						// if (remoteQueCounts.get(fromOthers.player) + 1 ==
