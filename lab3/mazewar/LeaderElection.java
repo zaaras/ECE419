@@ -36,7 +36,7 @@ public class LeaderElection extends Thread {
 				}
 
 			}
-			// System.out.println("My leader: " + Mazewar.leader);
+			 System.out.println("My leader: " + Mazewar.leader);
 			try {
 				Thread.sleep(500);
 			} catch (InterruptedException e) {
