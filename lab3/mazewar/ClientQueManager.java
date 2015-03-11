@@ -93,8 +93,7 @@ public class ClientQueManager extends Thread {
 
 							if (remoteQueCounts.get(fromOthers.player) + 1 == fromOthers.packet_id) {
 								// This is the expected msg
-								remoteQueCounts.put(fromOthers.player,
-										fromOthers.packet_id);
+								;
 							} else {
 								// Missed a package
 								System.out.println("Missing pack from " + fromOthers.player);
@@ -109,7 +108,7 @@ public class ClientQueManager extends Thread {
 								
 							}
 
-						
+							remoteQueCounts.put(fromOthers.player, fromOthers.packet_id);
 							PriorityQueue<EchoPacket> tempQue = remoteQues.get(fromOthers.player);
 							tempQue.add(fromOthers);
 							remoteQues.put(fromOthers.player, tempQue);
