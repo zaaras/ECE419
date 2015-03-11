@@ -381,10 +381,6 @@ public class Mazewar extends JFrame {
 				while (que.isEmpty());
 				fromServer = que.poll();
 				
-				if(fromServer.type == EchoPacket.REQUEST_MISSING && fromServer.missingPackOwner.equals(localClient.getName())){
-					System.out.println("here");
-					localClient.SendResponsePack(lookupIndex(MazewarClient.sentPackets, fromServer.missingIndex));
-				}
 				
 				if(fromServer.event == EchoPacket.FREEZE ){
 					while (true){

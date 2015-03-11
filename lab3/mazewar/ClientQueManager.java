@@ -65,6 +65,14 @@ public class ClientQueManager extends Thread {
 				objIn = new ObjectInputStream(byteInputStream);
 				fromOthers = (EchoPacket) objIn.readObject();
 
+				System.out.println(fromOthers.message);
+				
+
+				if(fromOthers.type == EchoPacket.REQUEST_MISSING && fromOthers.missingPackOwner.equals(Mazewar.localClient.getName())){
+					System.out.println("here");
+					Mazewar.localClient.SendResponsePack(lookupIndex(MazewarClient.sentPackets, fromOthers.missingIndex));
+				}
+				
 				if(fromOthers.type == EchoPacket.RESPONSE_MISSING){
 					System.out.println("reponse missing "+ fromOthers.player);
 					lookupRemove(fromOthers.packet_id);
@@ -73,7 +81,7 @@ public class ClientQueManager extends Thread {
 					remoteQues.put(fromOthers.player, tempQue);
 				}
 				
-				if(fromOthers.event == EchoPacket.FREEZE || fromOthers.event == EchoPacket.UNFREEZE)
+				if(fromOthers.event == EchoPacket.FREEZE || fromOthers.event == EchoPacket.UNFREEZE )
 					if (Mazewar.que.add(fromOthers));
 				
 				if(fromOthers.type == EchoPacket.DISCO)
@@ -152,6 +160,25 @@ public class ClientQueManager extends Thread {
 				
 			}
 		}
+	}
+	private EchoPacket lookupIndex(LinkedList<EchoPacket> sentPackets,
+			int missingIndex) {
+		
+		Iterator<EchoPacket> it = sentPackets.iterator();
+		EchoPacket tmp;
+		
+		while(it.hasNext()){
+			
+			tmp = it.next();
+			
+			if(tmp.packet_id == missingIndex){
+				return tmp;
+			}
+			
+			
+		}
+		return null;
+		
 	}
 
 	private void requestMissingPacket(String player, int i) {

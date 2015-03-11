@@ -137,6 +137,7 @@ public class MazewarClient {
 
 	public void SendResponsePack(String name, EchoPacket pack) throws IOException {
 		pack.type = EchoPacket.RESPONSE_MISSING;
+		pack.message = "response";
 		MultiCastPacket(pack);
 		
 	}
