@@ -65,7 +65,7 @@ public class ClientQueManager extends Thread {
 				objIn = new ObjectInputStream(byteInputStream);
 				fromOthers = (EchoPacket) objIn.readObject();
 
-				System.out.println(fromOthers.message);
+				//System.out.println("Type: " + fromOthers.message);
 				
 
 				if(fromOthers.type == EchoPacket.REQUEST_MISSING && fromOthers.missingPackOwner.equals(Mazewar.localClient.getName())){
@@ -106,13 +106,16 @@ public class ClientQueManager extends Thread {
 									fromOthers.packet_id);
 						} else {
 
-							if (remoteQueCounts.get(fromOthers.player) + 1 == fromOthers.packet_id) {
+							//if (remoteQueCounts.get(fromOthers.player) + 1 == fromOthers.packet_id) {
+							int pack = checkQue(fromOthers.player);
+							if (pack==-1) {								
 								// This is the expected msg
 								;
 							} else {
 								// Missed a package
 								System.out.println("Missing pack from " + fromOthers.player);
-								missingPacks.add(new missingPacket(remoteQueCounts.get(fromOthers.player) + 1, fromOthers.player));
+								//missingPacks.add(new missingPacket(remoteQueCounts.get(fromOthers.player) + 1, fromOthers.player));
+								missingPacks.add(new missingPacket(pack, fromOthers.player));
 								
 								Iterator<missingPacket> missingIterator = missingPacks.iterator();
 								missingPacket missing;
@@ -156,6 +159,24 @@ public class ClientQueManager extends Thread {
 				System.exit(1);
 			}
 		}
+	}
+
+	private synchronized int checkQue(String player) {
+		// TODO Auto-generated method stub
+		PriorityQueue<EchoPacket> searchq = remoteQues.get(player);
+		Iterator<EchoPacket> Packiterator = searchq.iterator();
+		int count = 0;
+		EchoPacket pack;
+		while(Packiterator.hasNext()){
+			pack = Packiterator.next();
+			if(pack.packet_id == count){
+				count++;
+			}else{
+				return count;
+			}
+		}
+		
+		return -1;
 	}
 
 	private void lookupRemove(int packet_id) {
