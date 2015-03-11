@@ -70,7 +70,12 @@ public class ClientQueManager extends Thread {
 
 				if(fromOthers.type == EchoPacket.REQUEST_MISSING && fromOthers.missingPackOwner.equals(Mazewar.localClient.getName())){
 					System.out.println("here");
-					Mazewar.localClient.SendResponsePack(lookupIndex(MazewarClient.sentPackets, fromOthers.missingIndex));
+					EchoPacket lookedup = lookupIndex(MazewarClient.sentPackets, fromOthers.missingIndex);
+					if(lookedup == null){
+						System.out.println("Look up failed");
+						System.exit(1);
+					}
+					Mazewar.localClient.SendResponsePack(lookedup);
 				}
 				
 				if(fromOthers.type == EchoPacket.RESPONSE_MISSING){
