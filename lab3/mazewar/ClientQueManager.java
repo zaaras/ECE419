@@ -115,10 +115,22 @@ public class ClientQueManager extends Thread {
 							System.out.println("init "+fromOthers.packet_id + " local " + fromOthers.player);
 						} // else {
 
-						PriorityQueue<EchoPacket> tempQue = remoteQues
-								.get(fromOthers.player);
-						tempQue.add(fromOthers);
-						remoteQues.put(fromOthers.player, tempQue);
+						
+						
+						if(fromOthers.event == EchoPacket.TICK){
+							if(Mazewar.leader.equals(fromOthers.player)){
+								PriorityQueue<EchoPacket> tempQue = remoteQues
+										.get(fromOthers.player);
+								tempQue.add(fromOthers);
+								remoteQues.put(fromOthers.player, tempQue);
+							}
+						}else{
+							PriorityQueue<EchoPacket> tempQue = remoteQues
+									.get(fromOthers.player);
+							tempQue.add(fromOthers);
+							remoteQues.put(fromOthers.player, tempQue);
+						}
+						
 
 						// if (remoteQueCounts.get(fromOthers.player) + 1 ==
 						// fromOthers.packet_id) {
@@ -152,6 +164,8 @@ public class ClientQueManager extends Thread {
 
 						// remoteQueCounts.put(fromOthers.player,
 						// fromOthers.packet_id);
+						
+						
 
 						Collection<Entry<String, PriorityQueue<EchoPacket>>> Pques = remoteQues
 								.entrySet();
