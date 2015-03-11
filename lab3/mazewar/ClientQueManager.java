@@ -66,6 +66,7 @@ public class ClientQueManager extends Thread {
 				fromOthers = (EchoPacket) objIn.readObject();
 
 				if(fromOthers.type == EchoPacket.RESPONSE_MISSING){
+					System.out.println("reponse missing "+ fromOthers.player);
 					lookupRemove(fromOthers.packet_id);
 					PriorityQueue<EchoPacket> tempQue = remoteQues.get(fromOthers.player);
 					tempQue.add(fromOthers);
@@ -96,6 +97,7 @@ public class ClientQueManager extends Thread {
 										fromOthers.packet_id);
 							} else {
 								// Missed a package
+								System.out.println("Missing pack from " + fromOthers.player);
 								missingPacks.add(new missingPacket(remoteQueCounts.get(fromOthers.player) + 1, fromOthers.player));
 								
 								Iterator<missingPacket> missingIterator = missingPacks.iterator();

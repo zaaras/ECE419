@@ -383,7 +383,7 @@ public class Mazewar extends JFrame {
 				
 				if(fromServer.type == EchoPacket.REQUEST_MISSING && fromServer.missingPackOwner.equals(localClient.getName())){
 					System.out.println("here");
-					localClient.sendPack(lookupIndex(MazewarClient.sentPackets, fromServer.missingIndex));
+					localClient.SendResponsePack(lookupIndex(MazewarClient.sentPackets, fromServer.missingIndex));
 				}
 				
 				if(fromServer.event == EchoPacket.FREEZE ){
