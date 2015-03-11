@@ -129,6 +129,7 @@ public class MazewarClient {
 	}
 
 	public void SendKill(String name, EchoPacket killPack) throws IOException {
+		killPack.message = "kill";
 		MultiCastPacket(killPack);
 	}
 
