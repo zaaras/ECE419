@@ -166,11 +166,9 @@ public class ClientQueManager extends Thread {
 								// System.out.println("missing packs in empty");
 								if (que.getValue().peek() != null) {
 									packet = que.getValue().poll();
-									if(packet.type==EchoPacket.KILL){
-										remoteQueCounts.put(packet.killer,	packet.packet_id + 1);
-									}else{
-										remoteQueCounts.put(packet.player,	packet.packet_id + 1);
-									}
+
+									remoteQueCounts.put(que.getKey(),	packet.packet_id + 1);
+									
 									if (Mazewar.que.add(packet))
 										;
 								}
