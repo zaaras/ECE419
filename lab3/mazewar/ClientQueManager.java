@@ -101,8 +101,8 @@ public class ClientQueManager extends Thread {
 				if (fromOthers.type == EchoPacket.DISCO)
 					continue;
 
-				if (Mazewar.que.add(fromOthers));
-				/*if (Mazewar.playerCount != 0) {
+		
+				if (Mazewar.playerCount != 0) {
 
 					if (Mazewar.alreadyConnected(Mazewar.remoteClients,
 							fromOthers.player)
@@ -178,7 +178,7 @@ public class ClientQueManager extends Thread {
 						}
 						// }
 					}
-				}*/
+				}
 
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
