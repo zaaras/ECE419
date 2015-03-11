@@ -3,6 +3,30 @@ import java.util.LinkedList;
 
 public class EchoPacket implements Serializable {
 
+
+
+	public EchoPacket(EchoPacket in) {
+		super();
+		this.type = in.type;
+		this.event = in.event;
+		this.playerCount = in.playerCount;
+		this.x = in.x;
+		this.y = in.y;
+		this.missingIndex = in.missingIndex;
+		this.dir = in.dir;
+		this.player = in.player;
+		this.killer = in.killer;
+		this.leader = in.leader;
+		this.missingPackOwner = in.missingPackOwner;
+		this.packet_id = in.packet_id;
+		this.message = in.message;
+		
+	}
+	
+	public EchoPacket() {
+		super();
+	}
+
 	/**
 	 * 
 	 */

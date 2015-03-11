@@ -74,6 +74,8 @@ public class ClientQueManager extends Thread {
 					if(lookedup == null){
 						System.out.println("Look up failed");
 						System.exit(1);
+					}else{
+						System.out.println("Look up success");
 					}
 					Mazewar.localClient.SendResponsePack(lookedup);
 				}
@@ -170,14 +172,17 @@ public class ClientQueManager extends Thread {
 			int missingIndex) {
 		
 		Iterator<EchoPacket> it = sentPackets.iterator();
-		EchoPacket tmp;
+		EchoPacket tmp, ret;
+		
 		
 		while(it.hasNext()){
 			
 			tmp = it.next();
 			
 			if(tmp.packet_id == missingIndex){
-				return tmp;
+				System.out.println("from lookup pack found");
+				ret = new EchoPacket(tmp);
+				return ret;
 			}
 			
 			
