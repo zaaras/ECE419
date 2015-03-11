@@ -51,6 +51,7 @@ public class MazewarClient {
 		packetToServer.type = EchoPacket.ECHO_REQUEST;
 		packetToServer.player = name;
 		packetToServer.event = event;
+		packetToServer.message = "event";
 		MultiCastPacket(packetToServer);
 	}
 
@@ -59,6 +60,7 @@ public class MazewarClient {
 		packetToServer.type = EchoPacket.ECHO_NEW;
 		packetToServer.player = name;
 		packetToServer.event = EchoPacket.CONN;
+		packetToServer.message = "init";
 		MultiCastPacket(packetToServer);
 	}
 
@@ -67,6 +69,7 @@ public class MazewarClient {
 		packetToServer.type = EchoPacket.ECHO_MISSING;
 		packetToServer.player = name;
 		packetToServer.packet_id = packetid;
+		packetToServer.message = "request_missing";
 		MultiCastPacket(packetToServer);
 	}
 
@@ -83,6 +86,7 @@ public class MazewarClient {
 		packetToServer.type = EchoPacket.ECHO_BYE;
 		packetToServer.player = name;
 		packetToServer.event = EchoPacket.ECHO_BYE;
+		packetToServer.message = "exit";
 		MultiCastPacket(packetToServer);
 	}
 	
@@ -99,6 +103,7 @@ public class MazewarClient {
 		packetToServer.event = EchoPacket.LEADER;
 		packetToServer.player = name;
 		packetToServer.leader = Leader;
+		packetToServer.message = "leader";
 		MultiCastPacket(packetToServer);
 	}
 
