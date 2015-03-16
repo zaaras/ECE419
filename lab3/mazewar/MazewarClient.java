@@ -12,7 +12,6 @@ public class MazewarClient {
 	DatagramSocket echoSocket = null;
 	public static LinkedList<EchoPacket> sentPackets = new LinkedList<EchoPacket>();
 
-
 	public MazewarClient(DatagramSocket dtSoc, String name) throws Exception {
 
 		echoSocket = dtSoc;
@@ -25,19 +24,33 @@ public class MazewarClient {
 	public void MultiCastPacket(EchoPacket pack) throws IOException {
 		byte[] buf;
 		ByteArrayOutputStream byteOutStream = new ByteArrayOutputStream();
-		pack.packet_id = Mazewar.packetCount;
-		pack.player = Mazewar.localClient.getName();
-		sentPackets.add(pack);
 		
-		if(sentPackets.size()>100){
-			;//sentPackets.remove();
+
+		
+		pack.player = Mazewar.localClient.getName();
+		
+
+		if (sentPackets.size() > 100) {
+			;// sentPackets.remove();
 		}
-		if(pack.type == EchoPacket.DISCO  || pack.type == EchoPacket.FREEZE || pack.type == EchoPacket.UNFREEZE){
-			;
-		}else{
+		if (pack.type == EchoPacket.DISCO || pack.type == EchoPacket.FREEZE
+				|| pack.type == EchoPacket.UNFREEZE
+				|| pack.type == EchoPacket.REQUEST_MISSING
+				|| pack.type == EchoPacket.RESPONSE_MISSING) {
+			//Mazewar.packetCount--;
+		} else {
+			sentPackets.add(pack);
 			Mazewar.packetCount++;
 		}
 		
+		if(pack.response == 1 || pack.type == EchoPacket.FREEZE
+				|| pack.type == EchoPacket.UNFREEZE
+				|| pack.type == EchoPacket.RESPONSE_MISSING)
+			Mazewar.packetCount--;
+			
+		if(pack.response != 1)
+			pack.packet_id = Mazewar.packetCount;
+
 		ObjectOutput objOut = null;
 		objOut = new ObjectOutputStream(byteOutStream);
 		DatagramPacket outPack;
@@ -91,7 +104,7 @@ public class MazewarClient {
 		packetToServer.message = "exit";
 		MultiCastPacket(packetToServer);
 	}
-	
+
 	public void SendFreeze(String name) throws IOException {
 		EchoPacket packetToServer = new EchoPacket();
 		packetToServer.event = EchoPacket.FREEZE;
@@ -99,7 +112,7 @@ public class MazewarClient {
 		packetToServer.message = "freeeze";
 		MultiCastPacket(packetToServer);
 	}
-	
+
 	public void SendLeader(String name, String Leader) throws IOException {
 		EchoPacket packetToServer = new EchoPacket();
 		packetToServer.event = EchoPacket.LEADER;
@@ -109,8 +122,8 @@ public class MazewarClient {
 		MultiCastPacket(packetToServer);
 	}
 
-
-	public void SendUnFreeze(String name, Point point, Direction direction) throws IOException {
+	public void SendUnFreeze(String name, Point point, Direction direction)
+			throws IOException {
 		EchoPacket packetToServer = new EchoPacket();
 		packetToServer.event = EchoPacket.UNFREEZE;
 		packetToServer.player = name;
@@ -119,7 +132,7 @@ public class MazewarClient {
 		packetToServer.dir = direction;
 		packetToServer.message = "unfreeeze";
 		MultiCastPacket(packetToServer);
-		
+
 	}
 
 	public void SendTick(String name) throws IOException {
@@ -135,7 +148,8 @@ public class MazewarClient {
 		MultiCastPacket(killPack);
 	}
 
-	public void SendMissingPack(String name, String from, int index) throws IOException {
+	public void RequestMissingPack(String name, String from, int index)
+			throws IOException {
 		EchoPacket packetToServer = new EchoPacket();
 		packetToServer.type = EchoPacket.REQUEST_MISSING;
 		packetToServer.player = name;
@@ -143,14 +157,16 @@ public class MazewarClient {
 		packetToServer.missingIndex = index;
 		packetToServer.message = "missing";
 		MultiCastPacket(packetToServer);
-		
+
 	}
 
-	public void SendResponsePack(String name, EchoPacket pack) throws IOException {
-		pack.type = EchoPacket.RESPONSE_MISSING;
-		pack.message = "response";
+	public void SendResponsePack(String name, EchoPacket pack)
+			throws IOException {
+		//pack.type = EchoPacket.RESPONSE_MISSING;
+		pack.response = 1;
+		//pack.message = "response";
 		MultiCastPacket(pack);
-		
+
 	}
 
 }

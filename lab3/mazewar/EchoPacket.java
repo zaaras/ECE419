@@ -70,6 +70,7 @@ public class EchoPacket implements Serializable {
 	int playerCount;
 	int x,y;
 	int missingIndex ;
+	int response;
 	Direction dir;
 	String player;
 	String killer;
@@ -83,5 +84,13 @@ public class EchoPacket implements Serializable {
 	String message;
 	
 	LinkedList<serverClient> serverClients;
+
+	@Override
+	public String toString() {
+		return "EchoPacket [response=" + response + ", player=" + player
+				+ ", packet_id=" + packet_id + ", message=" + message + "]";
+	}
+	
+	
 	
 }

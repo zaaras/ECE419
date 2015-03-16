@@ -35,11 +35,12 @@ public class DiscoveryThread extends Thread{
 		discoPack.type = EchoPacket.DISCO;
 		discoPack.player = localName;
 		discoPack.message = "lets disco";
+		discoPack.dir = Direction.East;
 
 		while (true) {
 			discoPack.x = Mazewar.localClient.getPoint().getX();
 			discoPack.y = Mazewar.localClient.getPoint().getY();
-			discoPack.dir = Mazewar.localClient.getOrientation();
+			//discoPack.dir = Mazewar.localClient.getOrientation();
 			try {
 				MultiCastPacket(discoPack);
 				Thread.sleep(1000);

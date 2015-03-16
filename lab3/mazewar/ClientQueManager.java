@@ -11,7 +11,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map.Entry;
 import java.util.PriorityQueue;
-import java.util.Queue;
 
 public class ClientQueManager extends Thread {
 
@@ -27,6 +26,8 @@ public class ClientQueManager extends Thread {
 	public static int localCountQue = 0;
 
 	public static LinkedList<missingPacket> missingPacks = new LinkedList<missingPacket>();
+
+	int once = 1;
 
 	private class missingPacket {
 
@@ -63,32 +64,51 @@ public class ClientQueManager extends Thread {
 				byteInputStream = new ByteArrayInputStream(inBuf);
 				objIn = new ObjectInputStream(byteInputStream);
 				fromOthers = (EchoPacket) objIn.readObject();
+				
+				if (fromOthers.type == EchoPacket.DISCO)
+					continue;
 
-				System.out.println("Type: " + fromOthers.message + " "
-						+ fromOthers.packet_id +" from: " + fromOthers.player);
+				if (fromOthers.packet_id == 100 && once == 1 && fromOthers.player.equals("b")) {
+					System.out.println("Packet DROP");
+					once = 0;
+					//fromOthers.packet_id = 10;
+					continue;
+				}
+
+				System.out.println("Type: " + fromOthers.toString());
 
 				if (fromOthers.type == EchoPacket.REQUEST_MISSING
 						&& fromOthers.missingPackOwner
 								.equals(Mazewar.localClient.getName())) {
-					System.out.println("here");
+					//System.out.println("Looking for pack: "
+					//		+ fromOthers.missingIndex);
 					EchoPacket lookedup = lookupIndex(
 							MazewarClient.sentPackets, fromOthers.missingIndex);
 					if (lookedup == null) {
 						System.out.println("Look up failed");
 						System.exit(1);
 					} else {
-						System.out.println("Look up success");
+						// System.out.println("Look up success");
 					}
+					lookedup.missingPackOwner = fromOthers.player;
 					Mazewar.localClient.SendResponsePack(lookedup);
+					continue;
 				}
 
-				if (fromOthers.type == EchoPacket.RESPONSE_MISSING) {
-					System.out.println("reponse missing " + fromOthers.player);
+				//if (fromOthers.type == EchoPacket.RESPONSE_MISSING) {
+				if (fromOthers.response == 1 && fromOthers.missingPackOwner
+						.equals(Mazewar.localClient.getName())) {
+
+					//System.out.println("response: " + fromOthers.packet_id);
+
 					lookupRemove(fromOthers.packet_id);
 					PriorityQueue<EchoPacket> tempQue = remoteQues
 							.get(fromOthers.player);
 					tempQue.add(fromOthers);
 					remoteQues.put(fromOthers.player, tempQue);
+					remoteQueCounts
+							.put(fromOthers.player, fromOthers.packet_id);
+					continue;
 				}
 
 				if (fromOthers.event == EchoPacket.FREEZE
@@ -98,10 +118,6 @@ public class ClientQueManager extends Thread {
 					continue; // We added this <-------------------------------
 				}
 
-				if (fromOthers.type == EchoPacket.DISCO)
-					continue;
-
-		
 				if (Mazewar.playerCount != 0) {
 
 					if (Mazewar.alreadyConnected(Mazewar.remoteClients,
@@ -112,18 +128,16 @@ public class ClientQueManager extends Thread {
 						if (remoteQueCounts.get(fromOthers.player) == -1) {
 							remoteQueCounts.put(fromOthers.player,
 									fromOthers.packet_id);
-							System.out.println("init "+fromOthers.packet_id + " local " + fromOthers.player);
+							System.out.println("init " + fromOthers.packet_id
+									+ " local " + fromOthers.player);
 						} // else {
 
+						PriorityQueue<EchoPacket> tempQue = remoteQues
+								.get(fromOthers.player);
+						tempQue.add(fromOthers);
+						remoteQues.put(fromOthers.player, tempQue);
 						
-						
-
-							PriorityQueue<EchoPacket> tempQue = remoteQues
-									.get(fromOthers.player);
-							tempQue.add(fromOthers);
-							remoteQues.put(fromOthers.player, tempQue);
-						
-						
+						//System.out.println(tempQue.toString());
 
 						// if (remoteQueCounts.get(fromOthers.player) + 1 ==
 						// fromOthers.packet_id) {
@@ -132,14 +146,14 @@ public class ClientQueManager extends Thread {
 						if (pack == -1) {
 							// This is the expected msg
 
-						} else {
+						} else if (!inMissingList(new missingPacket(pack,
+								fromOthers.player))) {
 							// Missed a package
+
 							System.out.println("Missing pack from "
 									+ fromOthers.player + " " + pack + " "
 									+ Mazewar.localClient.getName());
-							// missingPacks.add(new
-							// missingPacket(remoteQueCounts.get(fromOthers.player)
-							// + 1, fromOthers.player));
+			
 							missingPacks.add(new missingPacket(pack,
 									fromOthers.player));
 
@@ -151,14 +165,11 @@ public class ClientQueManager extends Thread {
 								requestMissingPacket(missing.missingFrom,
 										missing.missingPack);
 							}
-							System.exit(1);
 
 						}
 
 						// remoteQueCounts.put(fromOthers.player,
 						// fromOthers.packet_id);
-						
-						
 
 						Collection<Entry<String, PriorityQueue<EchoPacket>>> Pques = remoteQues
 								.entrySet();
@@ -171,12 +182,13 @@ public class ClientQueManager extends Thread {
 							que = queIterator.next();
 
 							if (missingPacks.isEmpty()) {
-								// System.out.println("missing packs in empty");
-								if (que.getValue().peek() != null) {
+								
+								while (que.getValue().peek() != null) {
 									packet = que.getValue().poll();
 
-									remoteQueCounts.put(que.getKey(),	packet.packet_id + 1);
-									
+									remoteQueCounts.put(que.getKey(),
+											packet.packet_id + 1);
+
 									if (Mazewar.que.add(packet))
 										;
 								}
@@ -195,12 +207,30 @@ public class ClientQueManager extends Thread {
 		}
 	}
 
+	private boolean inMissingList(missingPacket pack) {
+		Iterator<missingPacket> iterator = missingPacks.iterator();
+		missingPacket item;
+
+		while (iterator.hasNext()) {
+			item = iterator.next();
+
+			if (pack.missingFrom.equals(item.missingFrom)
+					&& (pack.missingPack == item.missingPack)) {
+				return true;
+			}
+		}
+
+		return false;
+
+	}
+
 	private synchronized int checkQue(String player, int startPoint) {
 		// TODO Auto-generated method stub
 		PriorityQueue<EchoPacket> searchq = remoteQues.get(player);
 		Iterator<EchoPacket> Packiterator = searchq.iterator();
 		int count = startPoint;
 		EchoPacket pack;
+		// System.out.println(searchq.toString());
 		while (Packiterator.hasNext()) {
 			pack = Packiterator.next();
 			if (pack.packet_id == count) {
@@ -218,8 +248,9 @@ public class ClientQueManager extends Thread {
 		while (it.hasNext()) {
 			missingPacket tmp = it.next();
 			if (tmp.missingPack == packet_id) {
-				it.remove();
 
+				it.remove();
+				//System.out.println("REMOVED " + missingPacks.size());
 			}
 		}
 	}
@@ -235,7 +266,6 @@ public class ClientQueManager extends Thread {
 			tmp = it.next();
 
 			if (tmp.packet_id == missingIndex) {
-				System.out.println("from lookup pack found");
 				ret = new EchoPacket(tmp);
 				return ret;
 			}
@@ -248,7 +278,7 @@ public class ClientQueManager extends Thread {
 	private void requestMissingPacket(String player, int i) {
 		// TODO Auto-generated method stub
 		// System.out.println("missing packet " + i + " from " + player);
-		Mazewar.localClient.sendMissingPack(player, i);
+		Mazewar.localClient.requestMissingPack(player, i);
 
 	}
 }
