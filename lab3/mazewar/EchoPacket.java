@@ -88,7 +88,7 @@ public class EchoPacket implements Serializable {
 	@Override
 	public String toString() {
 		return "EchoPacket [response=" + response + ", player=" + player
-				+ ", packet_id=" + packet_id + ", message=" + message + "]";
+				+ ", packet_id=" + packet_id + ", message=" + message + ", missingIndex=" + missingIndex + ", owner=" + missingPackOwner +"]";
 	}
 	
 	
