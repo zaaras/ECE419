@@ -104,6 +104,16 @@ public class MazewarClient {
 		packetToServer.message = "exit";
 		MultiCastPacket(packetToServer);
 	}
+	
+	public void SendExitOther(String name) throws IOException {
+		EchoPacket packetToServer = new EchoPacket();
+		packetToServer.type = EchoPacket.ECHO_BYE;
+
+		packetToServer.victim = name;
+		packetToServer.event = EchoPacket.ECHO_BYE;
+		packetToServer.message = "exit";
+		MultiCastPacket(packetToServer);
+	}
 
 	public void SendFreeze(String name) throws IOException {
 		EchoPacket packetToServer = new EchoPacket();

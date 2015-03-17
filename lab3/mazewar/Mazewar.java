@@ -65,7 +65,7 @@ public class Mazewar extends JFrame {
 	/**
 	 * The {@link Maze} that the game uses.
 	 */
-	private Maze maze = null;
+	public static Maze maze = null;
 
 	/**
 	 * The {@link GUIClient} for the game.
@@ -458,6 +458,11 @@ public class Mazewar extends JFrame {
 				}
 
 				if (fromServer.type == EchoPacket.ECHO_BYE) {
+					//fromServer.player.equals(leader) &&
+					if( fromServer.victim!=null){
+						fromServer.player = fromServer.victim;
+					}
+					
 					Iterator<GUIClient> itremote;
 					Client tempremote;
 					itremote = remoteClients.iterator();
@@ -574,7 +579,7 @@ public class Mazewar extends JFrame {
 		return false;
 	}
 	
-	private int alreadyConnectedsc(LinkedList<serverClient> rc,
+	public int alreadyConnectedsc(LinkedList<serverClient> rc,
 			String sclient) {
 
 		Iterator<serverClient> it = rc.iterator();

@@ -25,6 +25,7 @@ public class ClientQueManager extends Thread {
 	public static HashMap<String, Integer> remoteQueCounts = new HashMap<String, Integer>();
 	public static int localCountQue = 0;
 
+
 	public static LinkedList<missingPacket> missingPacks = new LinkedList<missingPacket>();
 
 	int once = 1;
@@ -64,7 +65,10 @@ public class ClientQueManager extends Thread {
 				byteInputStream = new ByteArrayInputStream(inBuf);
 				objIn = new ObjectInputStream(byteInputStream);
 				fromOthers = (EchoPacket) objIn.readObject();
-
+				
+				if(fromOthers.type == EchoPacket.DISCO)
+					continue;
+				
 				/*if (fromOthers.packet_id%50 == 0 && once == 1
 						&& fromOthers.player.equals("b")) {
 					System.out.println("Packet DROP");
@@ -73,8 +77,6 @@ public class ClientQueManager extends Thread {
 					continue;
 				}*/
 
-				if (fromOthers.type == EchoPacket.DISCO)
-					continue;
 
 				//System.out.println("Type: " + fromOthers.toString());
 
@@ -257,6 +259,8 @@ public class ClientQueManager extends Thread {
 			}
 		}
 	}
+
+
 
 	private boolean inMissingList(missingPacket pack) {
 		Iterator<missingPacket> iterator = missingPacks.iterator();
