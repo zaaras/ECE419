@@ -65,10 +65,10 @@ public class ClientQueManager extends Thread {
 				objIn = new ObjectInputStream(byteInputStream);
 				fromOthers = (EchoPacket) objIn.readObject();
 
-				if (fromOthers.packet_id == 100 && once == 1
+				if (fromOthers.packet_id%50 == 0 && once == 1
 						&& fromOthers.player.equals("b")) {
 					System.out.println("Packet DROP");
-					once = 0;
+					once = 1;
 					// fromOthers.packet_id = 10;
 					continue;
 				}
