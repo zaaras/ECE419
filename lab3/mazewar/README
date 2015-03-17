@@ -1,11 +1,10 @@
-Lab2 Mazewar
+Lab3 Mazewar
 Zaara Syeda - 998 199 765
 Ghulam Umar - 998 513 988
 
 Instructions to run:
 - Build using script ./makeserver.sh
-- Start server with script ./run_server.sh
 - Connect clients with script ./run.sh
 
-Note: Currently the clients are hardcoded to connect to localhost
-Note2: Remote client and local client are reversed. i.e. local client is purple 
+Note: Remote client and local client are reversed. i.e. local client is purple 
+Note2: Once a player joins the game he has to spin around to over come a bug in the games code for orientation 

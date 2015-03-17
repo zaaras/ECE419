@@ -470,7 +470,7 @@ public class MazeImpl extends Maze implements Serializable, ClientListener,
 		assert (checkBounds(point));
 		CellImpl cell = getCellImpl(point);
 		Direction d;
-		d = Direction.East;
+		d = Direction.North;
 
 		cell.setContents(client);
 		clientMap.put(client, new DirectedPoint(point, d));
@@ -529,10 +529,11 @@ public class MazeImpl extends Maze implements Serializable, ClientListener,
 				point = new Point(randomGen.nextInt(maxX), randomGen.nextInt(maxY));
 				cell = getCellImpl(point);
 			}
-			Direction d = Direction.random();
-			while (cell.isWall(d)) {
-				d = Direction.random();
-			}
+			//Direction d = Direction.random();
+			Direction d = Direction.North;
+			//while (cell.isWall(d)) {
+			//	d = Direction.North;
+			//}
 		
 		
 			EchoPacket killPack = new EchoPacket();
