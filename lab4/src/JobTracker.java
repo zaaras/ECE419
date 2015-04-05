@@ -1,21 +1,25 @@
 import java.net.InetAddress;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException.Code;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.Watcher.Event.EventType;
+import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.Stat;
 
 public class JobTracker {
 	static String primaryJobTracker = "/PrimaryJobTracker";
-	static ZkConnector zkc;
-	private boolean leader = false;
-	private Watcher watcher;
+	private static ZkConnector zkc;
+	private static ZooKeeper zk;
+	private Watcher watcher, jobsWatcher;
 	private JobTrackerServer server;
 	private static InetAddress localHost;
+	public static LinkedBlockingQueue<String> hashQue = new LinkedBlockingQueue<String>();
+	private boolean leader = false;
 	
-	public static Integer localPort = 1111;
+	public static Integer localPort = 4444;
 
 	public JobTracker(String string) {
 		zkc = new ZkConnector();
@@ -33,8 +37,47 @@ public class JobTracker {
 				handleEvent(event);
 			}
 		};
+		
+		jobsWatcher = new Watcher(){
+			@Override
+			public void process(WatchedEvent event) {
+				handleJobEvent(event);
+			}
+
+			
+		};
+		zk = zkc.getZooKeeper();
 	}
 
+	private void handleJobEvent(WatchedEvent event) {
+		// watcher triggered when the JOB que in zookeeper changes
+		String path = event.getPath();
+		//EventType type = event.getType();
+		
+		if (path.equalsIgnoreCase(JobTrackerQueManager.jobPath)) {
+			if(leader)
+				delegateJob();
+		}
+		checkJobPath();
+	}
+	
+	void delegateJob(){
+		System.out.println("delegate job");
+		
+		Stat stat = zkc.exists(Worker.workerPool, null);
+		if(stat == null || stat.getNumChildren() == 0) {
+			System.out.println("No workers, try again later.");
+		}else{
+			
+			System.out.print("Workers: " + stat.getNumChildren());
+		}
+	}
+	
+	private void checkJobPath(){
+		//Stat stat = 
+		zkc.exists(JobTrackerQueManager.jobPath, jobsWatcher);
+	}
+	
 	public static void main(String[] args) {
 
 		if (args.length != 1) {
@@ -42,15 +85,17 @@ public class JobTracker {
 					.println("Usage: java -classpath lib/zookeeper-3.3.2.jar:lib/log4j-1.2.15.jar:. JobTracker zkServer:clientPort");
 			return;
 		}
+		
+		new JobTrackerQueManager(args[0]).start();
 
 		JobTracker jt = new JobTracker(args[0]);
-
-		jt.checkpath();
-		// Create primary job tracker znode and elect leader
+		jt.checkpath(); // Leader election
+		jt.checkJobPath(); // Jobs que on zookeeper
+		
 
 		while (true)
 			try {
-				Thread.sleep(100);
+				Thread.sleep(10);
 			} catch (Exception e) {
 			}
 	}

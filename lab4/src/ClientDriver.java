@@ -1,5 +1,5 @@
+import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.Scanner;
 
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
@@ -9,12 +9,12 @@ import org.apache.zookeeper.data.Stat;
 
 public class ClientDriver {
 	private Watcher watcher;
-	private static Scanner in = new Scanner(System.in);
-	private static String inputHashes;
-	private ZkConnector zkc;
+
+	public static ZkConnector zkc;
 	private ZooKeeper zk;
 	private String JobTrackerIp;
 	private Socket JobTrackerSoc;
+	public static ObjectOutputStream out = null;
 
 	public ClientDriver(String string) {
 
@@ -42,14 +42,26 @@ public class ClientDriver {
 	private void handleEvent(WatchedEvent event) {
 		String path = event.getPath();
 		EventType type = event.getType();
+		System.out.println("watcher");
+		try {
 
-		if (path.equalsIgnoreCase(JobTracker.primaryJobTracker)) {
-			if (type == EventType.NodeDeleted) {
+			if (path.equalsIgnoreCase(JobTracker.primaryJobTracker)) {
+				if (type == EventType.NodeDeleted) {
+					 System.out.println("node deleted");
+					JobTrackerSoc.close();
+					JobTrackerSoc = null;
+					out = null;
+					zkc.exists(JobTracker.primaryJobTracker, watcher);
+					
+				}
+				if (type == EventType.NodeCreated) {
+					System.out.println("new node");
+					checkJobTrackers();
+				}
+			}
 
-			}
-			if (type == EventType.NodeCreated) {
-				checkJobTrackers();
-			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -61,11 +73,19 @@ public class ClientDriver {
 			System.exit(0);
 		} else {
 			try {
-				JobTrackerIp = new String(zk.getData(JobTracker.primaryJobTracker, false, null));
-				System.out.println("Found primary JobTracker at " + JobTrackerIp);
+				// if (JobTrackerSoc == null) {
+				
+				Thread.sleep(1000);
+				JobTrackerIp = new String(zk.getData(
+						JobTracker.primaryJobTracker, false, null));
+				System.out.println("Found primary JobTracker at "
+						+ JobTrackerIp);
 				JobTrackerSoc = new Socket(JobTrackerIp, JobTracker.localPort);
+				out = new ObjectOutputStream(JobTrackerSoc.getOutputStream());
+				// }
 			} catch (Exception e) {
-			}			
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -80,11 +100,12 @@ public class ClientDriver {
 		// Get IP for primary job Tracker from zookeeper
 		ClientDriver cd = new ClientDriver(args[0]);
 		cd.checkJobTrackers();
-		
+
+		ClientDriverInputThread cdt = new ClientDriverInputThread();
+		cdt.start();
+
 		while (true) {
-			inputHashes = in.nextLine();
-			System.out.println(inputHashes);
-			
+			;
 		}
 
 	}
