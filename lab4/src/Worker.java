@@ -3,6 +3,7 @@ import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.KeeperException.Code;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
+import org.apache.zookeeper.Watcher.Event.EventType;
 import org.apache.zookeeper.ZooDefs.Ids;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.Stat;
@@ -14,34 +15,44 @@ public class Worker {
 	private static String currentCount = "1";
 	private static ZooKeeper zk;
 	private static ZkConnector zkc;
+	private Watcher watcher;
 
 	static Integer tmp;
 
-	public static void main(String[] args) {
-		if (args.length != 1) {
-			System.out
-					.println("Usage: java -classpath lib/zookeeper-3.3.2.jar:lib/log4j-1.2.15.jar:. A zkServer:clientPort");
-			return;
-		}
-
+	public Worker(String string) {
 		zkc = new ZkConnector();
 		try {
-			zkc.connect(args[0]);
+			zkc.connect(string);
 		} catch (Exception e) {
 			System.out.println("Zookeeper connect " + e.getMessage());
 		}
 
 		zk = zkc.getZooKeeper();
+		watcher = new Watcher() {
+
+			@Override
+			public void process(WatchedEvent event) {
+				// String path = event.getPath();
+				try {
+					if (zkc.exists(workerPool + workerName + currentCount, null) != null) {
+
+						EventType type = event.getType();
+						if (type == EventType.NodeDataChanged) {
+							System.out.println("data changed:");
+							System.out.println(new String(zk.getData(workerPool
+									+ workerName + currentCount, false, null)));
+						}
+					}
+					addWatcher();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+
+		};
 
 		try {
-			Stat stat = zkc.exists(workerPath, new Watcher() {
-
-				@Override
-				public void process(WatchedEvent event) {
-
-				}
-
-			});
+			Stat stat = zkc.exists(workerPath, watcher);
 
 			if (stat == null) {
 				System.out.println("Creating " + workerPath);
@@ -77,9 +88,24 @@ public class Worker {
 		} catch (Exception e) {
 			System.out.println("Make node:" + e.getMessage());
 		}
+	}
+
+	public static void main(String[] args) {
+		if (args.length != 1) {
+			System.out
+					.println("Usage: java -classpath lib/zookeeper-3.3.2.jar:lib/log4j-1.2.15.jar:. A zkServer:clientPort");
+			return;
+		}
+
+		Worker w = new Worker(args[0]);
+		w.addWatcher();
 
 		while (true)
 			;
+	}
+
+	private void addWatcher() {
+		zkc.exists(workerPool + workerName + currentCount, watcher);
 	}
 
 	private static void joinPool() throws KeeperException, InterruptedException {

@@ -1,4 +1,7 @@
 import java.net.InetAddress;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.zookeeper.CreateMode;
@@ -17,8 +20,9 @@ public class JobTracker {
 	private JobTrackerServer server;
 	private static InetAddress localHost;
 	public static LinkedBlockingQueue<String> hashQue = new LinkedBlockingQueue<String>();
+	private static List<String> workers = new LinkedList<String>();
 	private boolean leader = false;
-	
+
 	public static Integer localPort = 4444;
 
 	public JobTracker(String string) {
@@ -26,7 +30,7 @@ public class JobTracker {
 		try {
 			localHost = InetAddress.getLocalHost();
 			zkc.connect(string);
-			
+
 		} catch (Exception e) {
 			System.out.println("Zookeeper connect " + e.getMessage());
 		}
@@ -37,14 +41,13 @@ public class JobTracker {
 				handleEvent(event);
 			}
 		};
-		
-		jobsWatcher = new Watcher(){
+
+		jobsWatcher = new Watcher() {
 			@Override
 			public void process(WatchedEvent event) {
 				handleJobEvent(event);
 			}
 
-			
 		};
 		zk = zkc.getZooKeeper();
 	}
@@ -52,32 +55,42 @@ public class JobTracker {
 	private void handleJobEvent(WatchedEvent event) {
 		// watcher triggered when the JOB que in zookeeper changes
 		String path = event.getPath();
-		//EventType type = event.getType();
-		
+		// EventType type = event.getType();
+
 		if (path.equalsIgnoreCase(JobTrackerQueManager.jobPath)) {
-			if(leader)
-				delegateJob();
+			if (leader)
+				delegateJob(); // read job from zookeeper que and give it to the workers
 		}
 		checkJobPath();
 	}
-	
-	void delegateJob(){
+
+	void delegateJob() {
 		System.out.println("delegate job");
-		
-		Stat stat = zkc.exists(Worker.workerPool, null);
-		if(stat == null || stat.getNumChildren() == 0) {
-			System.out.println("No workers, try again later.");
-		}else{
-			
-			System.out.print("Workers: " + stat.getNumChildren());
+		try {
+			Stat stat = zkc.exists(Worker.workerPool, null);
+			if (stat == null || stat.getNumChildren() == 0) {
+				System.out.println("No workers, try again later.");
+			} else {
+				workers = zk.getChildren(Worker.workerPool, false);
+				System.out.println("Workers: " + stat.getNumChildren());
+
+				Iterator<String> workerIterator = workers.iterator();
+				String worker ;
+				while (workerIterator.hasNext()) {
+					worker = workerIterator.next();
+					System.out.println(worker);
+					zk.setData(Worker.workerPool + "/" + worker, "temp".getBytes(), -1);
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
-	
-	private void checkJobPath(){
-		//Stat stat = 
+
+	private void checkJobPath() {
 		zkc.exists(JobTrackerQueManager.jobPath, jobsWatcher);
 	}
-	
+
 	public static void main(String[] args) {
 
 		if (args.length != 1) {
@@ -85,13 +98,12 @@ public class JobTracker {
 					.println("Usage: java -classpath lib/zookeeper-3.3.2.jar:lib/log4j-1.2.15.jar:. JobTracker zkServer:clientPort");
 			return;
 		}
-		
+
 		new JobTrackerQueManager(args[0]).start();
 
 		JobTracker jt = new JobTracker(args[0]);
 		jt.checkpath(); // Leader election
 		jt.checkJobPath(); // Jobs que on zookeeper
-		
 
 		while (true)
 			try {
@@ -106,11 +118,12 @@ public class JobTracker {
 
 		if (path.equalsIgnoreCase(primaryJobTracker)) {
 			if (type == EventType.NodeDeleted) {
-				//System.out.println(primaryJobTracker + " deleted! Let's go!");
+				// System.out.println(primaryJobTracker +
+				// " deleted! Let's go!");
 				checkpath(); // try to become the boss
 			}
 			if (type == EventType.NodeCreated) {
-				//System.out.println(primaryJobTracker + " created!");
+				// System.out.println(primaryJobTracker + " created!");
 
 				try {
 					Thread.sleep(500);
@@ -123,7 +136,7 @@ public class JobTracker {
 
 	private void checkpath() {
 		Stat stat = zkc.exists(primaryJobTracker, watcher);
-		leader = false;
+		// leader = false;
 		if (stat == null) { // znode doesn't exist; let's try creating it
 			System.out.println("Creating " + primaryJobTracker);
 			Code ret = zkc.create(primaryJobTracker, // Path of znode
