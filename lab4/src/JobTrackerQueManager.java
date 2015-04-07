@@ -80,7 +80,7 @@ public class JobTrackerQueManager extends Thread {
 		}
 	}
 
-	private LinkedList<String> deserializeList(String string) {
+	public static LinkedList<String> deserializeList(String string) {
 		String[] hashes;
 		string = string.substring(1, string.length() - 1);
 		LinkedList<String> ret = new LinkedList<String>();

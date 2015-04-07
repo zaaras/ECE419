@@ -1,3 +1,7 @@
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
+
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.KeeperException.Code;
@@ -15,7 +19,11 @@ public class Worker {
 	private static String currentCount = "1";
 	private static ZooKeeper zk;
 	private static ZkConnector zkc;
-	private Watcher watcher;
+	private Watcher watcher, connectionWatcher;
+	public static Socket FileServerSoc;
+	private String FileServerIp;
+	public static ObjectOutputStream toServer = null;
+	public static ObjectInputStream fromServer = null;
 
 	static Integer tmp;
 
@@ -28,7 +36,7 @@ public class Worker {
 		}
 
 		zk = zkc.getZooKeeper();
-		watcher = new Watcher() {
+		watcher = new Watcher() {// job tracker giving stuff to worker
 
 			@Override
 			public void process(WatchedEvent event) {
@@ -41,15 +49,89 @@ public class Worker {
 							System.out.println("data changed:");
 							System.out.println(new String(zk.getData(workerPool
 									+ workerName + currentCount, false, null)));
+							toServer.writeUTF(workerName + currentCount + ";"
+									+ "start;end");
+							toServer.flush();
 						}
 					}
-					addWatcher();
+					zkc.exists(workerPool + workerName + currentCount, watcher);
+					// addWorker();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 
 		};
+
+		connectionWatcher = new Watcher() {
+
+			@Override
+			public void process(WatchedEvent event) {
+				handleEvent(event);
+
+			}
+
+		};
+
+	}
+
+	private void handleEvent(WatchedEvent event) {
+		String path = event.getPath();
+		EventType type = event.getType();
+		System.out.println("watcher");
+		try {
+
+			if (path.equalsIgnoreCase(FileServer.primaryFileServer)) {
+				if (type == EventType.NodeDeleted) {
+					System.out.println("node deleted");
+					FileServerSoc.close();
+					FileServerSoc = null;
+					toServer = null;
+					zkc.exists(FileServer.primaryFileServer, connectionWatcher);
+
+				}
+				if (type == EventType.NodeCreated) {
+					System.out.println("new node");
+					checkFileServers();
+				}
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void checkFileServers() {
+		Stat stat = zkc.exists(FileServer.primaryFileServer, connectionWatcher);
+
+		if (stat == null) {
+			System.out.println("No FileServers spawed, exiting.");
+			System.exit(0);
+		} else {
+			try {
+				// if (JobTrackerSoc == null) {
+
+				Thread.sleep(1000);
+				FileServerIp = new String(zk.getData(
+						FileServer.primaryFileServer, false, null));
+				System.out.println("Found primary FileServer at "
+						+ FileServerIp);
+				FileServerSoc = new Socket(FileServerIp, FileServer.localPort);
+
+				toServer = new ObjectOutputStream(
+						FileServerSoc.getOutputStream());
+
+				WorkerInputThread inputThread = new WorkerInputThread(FileServerSoc);
+				inputThread.start();
+
+				// }
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	private void addWorker() {
 
 		try {
 			Stat stat = zkc.exists(workerPath, watcher);
@@ -88,24 +170,7 @@ public class Worker {
 		} catch (Exception e) {
 			System.out.println("Make node:" + e.getMessage());
 		}
-	}
 
-	public static void main(String[] args) {
-		if (args.length != 1) {
-			System.out
-					.println("Usage: java -classpath lib/zookeeper-3.3.2.jar:lib/log4j-1.2.15.jar:. A zkServer:clientPort");
-			return;
-		}
-
-		Worker w = new Worker(args[0]);
-		w.addWatcher();
-
-		while (true)
-			;
-	}
-
-	private void addWatcher() {
-		zkc.exists(workerPool + workerName + currentCount, watcher);
 	}
 
 	private static void joinPool() throws KeeperException, InterruptedException {
@@ -120,5 +185,20 @@ public class Worker {
 			System.out.println("Added to pool");
 		}
 
+	}
+
+	public static void main(String[] args) {
+		if (args.length != 1) {
+			System.out
+					.println("Usage: java -classpath lib/zookeeper-3.3.2.jar:lib/log4j-1.2.15.jar:. A zkServer:clientPort");
+			return;
+		}
+
+		Worker w = new Worker(args[0]);
+		w.checkFileServers();
+		w.addWorker();
+
+		while (true)
+			;
 	}
 }

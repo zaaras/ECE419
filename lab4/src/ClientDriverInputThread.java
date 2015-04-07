@@ -1,18 +1,12 @@
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.util.Scanner;
 
 
 public class ClientDriverInputThread extends Thread{
 
-
-	volatile ObjectOutputStream toServer;
 	String inputHashes;
 	private Scanner in = new Scanner(System.in);
-	
-	public ClientDriverInputThread() {
-		toServer = ClientDriver.out;
-	}
+
 
 	@Override
 	public void run() {
@@ -20,8 +14,8 @@ public class ClientDriverInputThread extends Thread{
 			inputHashes = in.nextLine();
 
 			try {
-				toServer.writeUTF(inputHashes);
-				toServer.flush();
+				ClientDriver.out.writeUTF(inputHashes);
+				ClientDriver.out.flush();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
