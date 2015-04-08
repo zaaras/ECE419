@@ -26,7 +26,7 @@ public class Worker {
 	public ObjectInputStream fromServer = null;
 	private int chunkStart, chunkEnd;
 	private String[] dataSplits;
-	volatile public String Hash;
+	volatile public String Hash,Name;
 	
 
 	static Integer tmp;
@@ -58,6 +58,7 @@ public class Worker {
 							chunkStart = Integer.parseInt(dataSplits[0]);
 							chunkEnd = Integer.parseInt(dataSplits[1]);
 							Hash = dataSplits[2];
+							Name = dataSplits[3];
 							
 							
 							dataIn = chunkStart + ";" + chunkEnd;
@@ -112,6 +113,16 @@ public class Worker {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	void writeResults(String name, String pswd){
+		try {
+			zk.setData(JobTracker.resultsFolder,"change".getBytes() , -1);
+			zkc.create(JobTracker.resultsFolder + name, pswd, CreateMode.EPHEMERAL);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
 	}
 
 	private void checkFileServers() {

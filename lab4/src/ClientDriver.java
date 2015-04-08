@@ -1,9 +1,12 @@
-import java.io.ObjectOutputStream;
+import java.io.ObjectInputStream;
 import java.net.Socket;
 
+import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.Watcher.Event.EventType;
+import org.apache.zookeeper.ZooDefs.Ids;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.Stat;
 
@@ -11,10 +14,12 @@ public class ClientDriver {
 	private Watcher watcher;
 
 	public static ZkConnector zkc;
+	private static String clientPath = "/Client";
+	public static String clientName = "/zumar";
+	private String currentCount = "1";
 	private ZooKeeper zk;
 	private String JobTrackerIp;
 	private Socket JobTrackerSoc;
-	public static ObjectOutputStream out = null;
 
 	public ClientDriver(String string) {
 
@@ -36,6 +41,8 @@ public class ClientDriver {
 			}
 
 		};
+		
+		
 
 	}
 
@@ -50,7 +57,6 @@ public class ClientDriver {
 					 System.out.println("node deleted");
 					JobTrackerSoc.close();
 					JobTrackerSoc = null;
-					out = null;
 					zkc.exists(JobTracker.primaryJobTracker, watcher);
 					
 				}
@@ -81,12 +87,19 @@ public class ClientDriver {
 				System.out.println("Found primary JobTracker at "
 						+ JobTrackerIp);
 				JobTrackerSoc = new Socket(JobTrackerIp, JobTracker.localPort);
-				out = new ObjectOutputStream(JobTrackerSoc.getOutputStream());
+				
 				// }
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
+		
+		ClientDriverInputThread cdt = new ClientDriverInputThread(JobTrackerSoc,currentCount);
+		cdt.start();
+		
+		ClientDriverOutputThread cdtout = new ClientDriverOutputThread(JobTrackerSoc,currentCount);
+		cdtout.start();
+		
 	}
 
 	public static void main(String[] args) {
@@ -99,14 +112,54 @@ public class ClientDriver {
 
 		// Get IP for primary job Tracker from zookeeper
 		ClientDriver cd = new ClientDriver(args[0]);
+		cd.addClient();
 		cd.checkJobTrackers();
-
-		ClientDriverInputThread cdt = new ClientDriverInputThread();
-		cdt.start();
-
+		
 		while (true) {
 			;
 		}
 
+	}
+
+	private void addClient() {
+		Integer tmp;
+		try {
+			Stat stat = zkc.exists(clientPath, watcher);
+
+			if (stat == null) {
+				System.out.println("Creating " + clientPath);
+				zk.create(clientPath, // Path of znode
+						"1".getBytes(), // Data not needed.
+						Ids.OPEN_ACL_UNSAFE, // ACL, set to Completely Open.
+						CreateMode.EPHEMERAL // Znode type, set to Persistent.
+				);
+
+				if (zkc.exists(clientPath, null) == null) {
+					zk.create(clientPath, // Path of znode
+							null, // Data not needed.
+							Ids.OPEN_ACL_UNSAFE, // ACL, set to Completely Open.
+							CreateMode.PERSISTENT // Znode type, set to
+													// Persistent.
+					);
+				}
+			} else {
+				currentCount = new String(zk.getData(clientPath, false, null));
+
+				tmp = Integer.parseInt(currentCount);
+				tmp++;
+
+				currentCount = tmp.toString();
+				zk.setData(clientPath, currentCount.getBytes(), -1);
+				System.out.println(currentCount);
+			}
+
+
+		} catch (KeeperException e) {
+			System.out.println(e.code());
+		} catch (Exception e) {
+			System.out.println("Make node:" + e.getMessage());
+		}
+		
+		
 	}
 }

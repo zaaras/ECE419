@@ -10,6 +10,8 @@ public class WorkerInputThread extends Thread {
 	Socket soc;
 	ObjectInputStream fromServer;
 	Worker parent;
+	boolean found = false;
+	
 
 	public WorkerInputThread(Socket fileServerSoc, Worker worker) {
 		soc = fileServerSoc;
@@ -24,32 +26,32 @@ public class WorkerInputThread extends Thread {
 			System.out.println("Input stream from server up");
 			while (true) {
 
-				
-				//if ((dictionary = fromServer.readUTF()) != null) {
 				if ((dictionaryHolder = fromServer.readObject()) != null) {
-					if(dictionaryHolder!=null){
-					//System.out.println("got something");
-					dictionary = (LinkedList<String>)dictionaryHolder;
-					System.out.println(dictionary.size());
-					System.out.println("Hash: " + parent.Hash);
-					Iterator<String> iterator = dictionary.iterator();
-					while(iterator.hasNext()){
-						
-						String pswd = iterator.next(), pswdHash;
-						pswdHash = MD5Test.getHash(pswd);
-						
-						if(parent.Hash.equals(pswdHash)){
-							System.out.println(pswd);
-							break;
-						}
-						
-						
-					}
-					
-					
+					if (dictionaryHolder != null) {
+						dictionary = (LinkedList<String>) dictionaryHolder;
+						System.out.println(dictionary.size());
+						System.out.println("Hash: " + parent.Hash);
+						Iterator<String> iterator = dictionary.iterator();
+						while (iterator.hasNext()) {
 
+							String pswd = iterator.next(), pswdHash;
+							pswdHash = MD5Test.getHash(pswd);
+
+							if (parent.Hash.equals(pswdHash)) {
+								System.out.println(pswd + " for " + parent.Name);
+								parent.writeResults(parent.Name, pswd);
+								found = true;
+								break;
+							}
+
+						}
+						if(!found){
+							parent.writeResults(parent.Name, "No password found");
+						}
 					}
 				}
+				
+				
 
 			}
 		} catch (Exception e) {
