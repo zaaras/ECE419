@@ -1,5 +1,6 @@
-import java.io.ObjectInputStream;
 import java.net.Socket;
+import java.util.Scanner;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
@@ -19,7 +20,12 @@ public class ClientDriver {
 	private String currentCount = "1";
 	private ZooKeeper zk;
 	private String JobTrackerIp;
-	private Socket JobTrackerSoc;
+	volatile private Socket JobTrackerSoc;
+	ClientDriverInputThread cdt;
+	ClientDriverOutputThread cdtout;
+	public static Scanner in = new Scanner(System.in);
+	public static LinkedBlockingQueue<String> inputQue = new LinkedBlockingQueue<String>();
+
 
 	public ClientDriver(String string) {
 
@@ -41,8 +47,6 @@ public class ClientDriver {
 			}
 
 		};
-		
-		
 
 	}
 
@@ -54,11 +58,21 @@ public class ClientDriver {
 
 			if (path.equalsIgnoreCase(JobTracker.primaryJobTracker)) {
 				if (type == EventType.NodeDeleted) {
-					 System.out.println("node deleted");
+					System.out.println("node deleted");
+					
+					cdt.killMe = true;
+					cdt.die();
+					cdt = null;
+
+					cdtout.die();
+					cdtout.killMe = true;
+					cdtout = null;
+
 					JobTrackerSoc.close();
+					// System.out.println("Closing socket");
 					JobTrackerSoc = null;
 					zkc.exists(JobTracker.primaryJobTracker, watcher);
-					
+
 				}
 				if (type == EventType.NodeCreated) {
 					System.out.println("new node");
@@ -80,26 +94,31 @@ public class ClientDriver {
 		} else {
 			try {
 				// if (JobTrackerSoc == null) {
-				
+
+				while (stat.getDataLength() == 0) {
+					stat = zkc.exists(JobTracker.primaryJobTracker, watcher);
+				}
 				Thread.sleep(1000);
 				JobTrackerIp = new String(zk.getData(
 						JobTracker.primaryJobTracker, false, null));
 				System.out.println("Found primary JobTracker at "
 						+ JobTrackerIp);
 				JobTrackerSoc = new Socket(JobTrackerIp, JobTracker.localPort);
-				
-				// }
+				while (!JobTrackerSoc.isConnected())
+					;
+
+
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
-		
-		ClientDriverInputThread cdt = new ClientDriverInputThread(JobTrackerSoc,currentCount);
+
+		cdt = new ClientDriverInputThread(JobTrackerSoc, currentCount);
 		cdt.start();
-		
-		ClientDriverOutputThread cdtout = new ClientDriverOutputThread(JobTrackerSoc,currentCount);
+
+		cdtout = new ClientDriverOutputThread(JobTrackerSoc, currentCount);
 		cdtout.start();
-		
+
 	}
 
 	public static void main(String[] args) {
@@ -114,9 +133,12 @@ public class ClientDriver {
 		ClientDriver cd = new ClientDriver(args[0]);
 		cd.addClient();
 		cd.checkJobTrackers();
+
 		
+		String input;
 		while (true) {
-			;
+			input = in.nextLine();
+			inputQue.add(input);
 		}
 
 	}
@@ -153,13 +175,11 @@ public class ClientDriver {
 				System.out.println(currentCount);
 			}
 
-
 		} catch (KeeperException e) {
 			System.out.println(e.code());
 		} catch (Exception e) {
 			System.out.println("Make node:" + e.getMessage());
 		}
-		
-		
+
 	}
 }
