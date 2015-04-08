@@ -1,6 +1,7 @@
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.concurrent.CountDownLatch;
 
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
@@ -24,6 +25,10 @@ public class Worker {
 	private String FileServerIp;
 	public static ObjectOutputStream toServer = null;
 	public static ObjectInputStream fromServer = null;
+	private int chunkStart, chunkEnd, chunkSplit, chunkSize;
+	private static final int dataSize = 5000;
+	private String[] dataSplits;
+	static CountDownLatch dataReceivedSignal = new CountDownLatch(1);
 
 	static Integer tmp;
 
@@ -40,18 +45,27 @@ public class Worker {
 
 			@Override
 			public void process(WatchedEvent event) {
-				// String path = event.getPath();
+				String dataIn = "";
 				try {
 					if (zkc.exists(workerPool + workerName + currentCount, null) != null) {
 
 						EventType type = event.getType();
 						if (type == EventType.NodeDataChanged) {
-							System.out.println("data changed:");
-							System.out.println(new String(zk.getData(workerPool
-									+ workerName + currentCount, false, null)));
+							dataIn = new String(zk.getData(workerPool
+									+ workerName + currentCount, false, null));
+							System.out.println(dataIn);
+
+							dataSplits = dataIn.split(";");
+							chunkStart = Integer.parseInt(dataSplits[0]);
+							chunkEnd = Integer.parseInt(dataSplits[1]);
+							chunkSize = chunkEnd - chunkStart;
+							int tmp;
+
+							dataIn = chunkStart + ";" + chunkEnd;
 							toServer.writeUTF(workerName + currentCount + ";"
-									+ "start;end");
+									+ dataIn);
 							toServer.flush();
+
 						}
 					}
 					zkc.exists(workerPool + workerName + currentCount, watcher);
@@ -121,7 +135,8 @@ public class Worker {
 				toServer = new ObjectOutputStream(
 						FileServerSoc.getOutputStream());
 
-				WorkerInputThread inputThread = new WorkerInputThread(FileServerSoc);
+				WorkerInputThread inputThread = new WorkerInputThread(
+						FileServerSoc);
 				inputThread.start();
 
 				// }

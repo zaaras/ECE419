@@ -22,6 +22,7 @@ public class JobTracker {
 	public static LinkedBlockingQueue<String> hashQue = new LinkedBlockingQueue<String>();
 	private static List<String> workers = new LinkedList<String>();
 	private boolean leader = false;
+	private int chunkSize, workerCount, splits=0;
 
 	public static Integer localPort = 4444;
 
@@ -66,25 +67,35 @@ public class JobTracker {
 
 	void delegateJob() {
 		System.out.println("delegate job");
+		
 		try {
 			Stat stat = zkc.exists(Worker.workerPool, null);
 			if (stat == null || stat.getNumChildren() == 0) {
 				System.out.println("No workers, try again later.");
 			} else {
+				
+				workerCount = stat.getNumChildren();
 				workers = zk.getChildren(Worker.workerPool, false);
-				System.out.println("Workers: " + stat.getNumChildren());
+				
+				chunkSize = FileServer.dictionarySize/workerCount;
+				System.out.println("Workers: " + workerCount);
 
 				Iterator<String> workerIterator = workers.iterator();
 				String worker ;
 				while (workerIterator.hasNext()) {
 					worker = workerIterator.next();
 					System.out.println(worker);
-					zk.setData(Worker.workerPool + "/" + worker, "temp".getBytes(), -1);
+					String data = Integer.toString(splits) + ";" + Integer.toString(splits+chunkSize+1);
+					zk.setData(Worker.workerPool + "/" + worker, data.getBytes() , -1);
+					splits = splits+chunkSize+1;
 				}
+				splits = 0;
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
+		
 	}
 
 	private void checkJobPath() {

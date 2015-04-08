@@ -3,9 +3,12 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException.Code;
@@ -29,8 +32,14 @@ public class FileServer {
 	public static Integer localPort = 3333;
 	public static LinkedBlockingQueue<String> requestQue = new LinkedBlockingQueue<String>();
 	public static LinkedBlockingQueue<String> outputQue = new LinkedBlockingQueue<String>();
+	public static HashMap<String, LinkedBlockingQueue<String> > requestQues = new HashMap<String, LinkedBlockingQueue<String>>();
+	
+	
+	public static final int dictionarySize = 265744;
+	public static Lock outputQuelock;
 
 	public FileServer(String con, String dic) {
+		outputQuelock = new ReentrantLock();
 		BufferedReader reader = null;
 		try {
 			reader = new BufferedReader(new FileReader(dic));
@@ -90,8 +99,8 @@ public class FileServer {
 
 		if (path.equalsIgnoreCase(FileServerQueManager.requestPath)) {
 			// if (leader)
-			if (event.getType() == EventType.NodeDataChanged)
-				delegateRequest(); // read job from zookeeper que and give it to
+			if (event.getType() == EventType.NodeDataChanged )
+				;//delegateRequest(); // read job from zookeeper que and give it to
 									// the workers
 		}
 		checkRequestPath();
@@ -101,22 +110,28 @@ public class FileServer {
 		zkc.exists(FileServerQueManager.requestPath, requestsWatcher);
 	}
 
-	void delegateRequest() {
+	static void delegateRequest() {
 		String list, item;
 		LinkedList<String> requests = new LinkedList<String>();
-		System.out.println("delegate request");
+		LinkedBlockingQueue<String> tmpQue = new LinkedBlockingQueue<String>();
+		//System.out.println("delegate request");
 		try {
 			Stat stat = zkc.exists(FileServerQueManager.requestPath, null);
 			if (stat != null) {
 				list = new String(zk.getData(FileServerQueManager.requestPath,
 						false, null));
 				requests = JobTrackerQueManager.deserializeList(list);
+				
+				if(requests.isEmpty()) return;
+				
 				item = requests.poll();
 				zk.setData(FileServerQueManager.requestPath, requests
 						.toString().getBytes(), -1);
 				// Add to output que
 				outputQue.add(item);
-				System.out.println("item from queue: " + item);
+				//tmpQue.add(item);
+				//requestQues.put(item.split(";")[0], tmpQue);
+				System.out.println("item from queue:" + outputQue.toString());
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -177,7 +192,9 @@ public class FileServer {
 		FileServer jt = new FileServer(args[0], args[1]);
 		jt.checkpath(); // Leader election
 		jt.checkRequestPath();
-
+		
+		new RequestDelegator().start();
+		
 		while (true) {
 			;
 

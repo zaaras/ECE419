@@ -1,10 +1,11 @@
-import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.Socket;
+import java.util.LinkedList;
 
 public class WorkerInputThread extends Thread {
 
-	String dictionary = null;
+	Object dictionaryHolder = null;
+	LinkedList<String> dictionary;
 	Socket soc;
 	ObjectInputStream fromServer;
 
@@ -12,6 +13,7 @@ public class WorkerInputThread extends Thread {
 		soc = fileServerSoc;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void run() {
 		try {
@@ -19,12 +21,19 @@ public class WorkerInputThread extends Thread {
 			System.out.println("Input stream from server up");
 			while (true) {
 
-				if ((dictionary = fromServer.readUTF()) != null) {
-					System.out.println(dictionary);
+				
+				//if ((dictionary = fromServer.readUTF()) != null) {
+				if ((dictionaryHolder = fromServer.readObject()) != null) {
+					if(dictionaryHolder!=null){
+					//System.out.println("got something");
+					dictionary = (LinkedList<String>)dictionaryHolder;
+					System.out.println(dictionary.size());
+					Worker.dataReceivedSignal.countDown();
+					}
 				}
 
 			}
-		} catch (IOException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

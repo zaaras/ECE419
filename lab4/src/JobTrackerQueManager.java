@@ -82,11 +82,14 @@ public class JobTrackerQueManager extends Thread {
 
 	public static LinkedList<String> deserializeList(String string) {
 		String[] hashes;
+		String str;
 		string = string.substring(1, string.length() - 1);
 		LinkedList<String> ret = new LinkedList<String>();
 		hashes = string.split(", ");
 		for (int i = 0; i < hashes.length; i++) {
-			ret.add(hashes[i]);
+			str = hashes[i].trim();
+			if(!str.isEmpty())
+				ret.add(hashes[i]);
 		}
 		return ret;
 	}

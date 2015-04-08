@@ -62,7 +62,7 @@ public class FileServerQueManager extends Thread {
 							);
 
 					if (ret == Code.OK) {
-						System.out.println("Jobs node created");
+						System.out.println("Requests node created");
 					}
 					System.out.println(requestList.toString());
 				} else {
