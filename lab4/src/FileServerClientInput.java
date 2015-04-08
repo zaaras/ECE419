@@ -3,8 +3,8 @@ import java.net.Socket;
 
 public class FileServerClientInput extends Thread {
 
-	ObjectInputStream fromClient;
-	Socket soc;
+	private ObjectInputStream fromClient;
+	private Socket soc;
 	int start, end;
 	FileServerClientHandler parent;
 	

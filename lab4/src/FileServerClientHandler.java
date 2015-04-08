@@ -7,7 +7,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class FileServerClientHandler extends Thread {
 
 	private Socket socket = null;
-	public static ObjectOutputStream toClient = null;
+	private ObjectOutputStream toClient = null;
 	volatile public String clientName;
 	private LinkedBlockingQueue<String> myQue = new LinkedBlockingQueue<String>();
 
