@@ -1,7 +1,6 @@
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.concurrent.CountDownLatch;
 
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
@@ -17,18 +16,18 @@ public class Worker {
 	public static String workerPath = "/Worker";
 	public static String workerPool = "/WorkerPool";
 	private static String workerName = "/guy";
-	private static String currentCount = "1";
+	private String currentCount = "1";
 	private static ZooKeeper zk;
 	private static ZkConnector zkc;
 	private Watcher watcher, connectionWatcher;
-	public static Socket FileServerSoc;
+	public Socket FileServerSoc;
 	private String FileServerIp;
-	public static ObjectOutputStream toServer = null;
-	public static ObjectInputStream fromServer = null;
-	private int chunkStart, chunkEnd, chunkSplit, chunkSize;
-	private static final int dataSize = 5000;
+	public ObjectOutputStream toServer = null;
+	public ObjectInputStream fromServer = null;
+	private int chunkStart, chunkEnd;
 	private String[] dataSplits;
-	static CountDownLatch dataReceivedSignal = new CountDownLatch(1);
+	volatile public String Hash;
+	
 
 	static Integer tmp;
 
@@ -58,9 +57,9 @@ public class Worker {
 							dataSplits = dataIn.split(";");
 							chunkStart = Integer.parseInt(dataSplits[0]);
 							chunkEnd = Integer.parseInt(dataSplits[1]);
-							chunkSize = chunkEnd - chunkStart;
-							int tmp;
-
+							Hash = dataSplits[2];
+							
+							
 							dataIn = chunkStart + ";" + chunkEnd;
 							toServer.writeUTF(workerName + currentCount + ";"
 									+ dataIn);
@@ -136,7 +135,7 @@ public class Worker {
 						FileServerSoc.getOutputStream());
 
 				WorkerInputThread inputThread = new WorkerInputThread(
-						FileServerSoc);
+						FileServerSoc, this);
 				inputThread.start();
 
 				// }
@@ -188,7 +187,7 @@ public class Worker {
 
 	}
 
-	private static void joinPool() throws KeeperException, InterruptedException {
+	private void joinPool() throws KeeperException, InterruptedException {
 
 		Code ret = zkc.create(workerPool + workerName + currentCount, // Path of
 																		// znode

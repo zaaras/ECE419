@@ -3,7 +3,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -32,8 +31,6 @@ public class FileServer {
 	public static Integer localPort = 3333;
 	public static LinkedBlockingQueue<String> requestQue = new LinkedBlockingQueue<String>();
 	public static LinkedBlockingQueue<String> outputQue = new LinkedBlockingQueue<String>();
-	public static HashMap<String, LinkedBlockingQueue<String> > requestQues = new HashMap<String, LinkedBlockingQueue<String>>();
-	
 	
 	public static final int dictionarySize = 265744;
 	public static Lock outputQuelock;
@@ -113,7 +110,6 @@ public class FileServer {
 	static void delegateRequest() {
 		String list, item;
 		LinkedList<String> requests = new LinkedList<String>();
-		LinkedBlockingQueue<String> tmpQue = new LinkedBlockingQueue<String>();
 		//System.out.println("delegate request");
 		try {
 			Stat stat = zkc.exists(FileServerQueManager.requestPath, null);
@@ -129,8 +125,6 @@ public class FileServer {
 						.toString().getBytes(), -1);
 				// Add to output que
 				outputQue.add(item);
-				//tmpQue.add(item);
-				//requestQues.put(item.split(";")[0], tmpQue);
 				System.out.println("item from queue:" + outputQue.toString());
 			}
 		} catch (Exception e) {

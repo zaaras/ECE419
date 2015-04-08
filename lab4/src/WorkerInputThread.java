@@ -1,5 +1,6 @@
 import java.io.ObjectInputStream;
 import java.net.Socket;
+import java.util.Iterator;
 import java.util.LinkedList;
 
 public class WorkerInputThread extends Thread {
@@ -8,9 +9,11 @@ public class WorkerInputThread extends Thread {
 	LinkedList<String> dictionary;
 	Socket soc;
 	ObjectInputStream fromServer;
+	Worker parent;
 
-	public WorkerInputThread(Socket fileServerSoc) {
+	public WorkerInputThread(Socket fileServerSoc, Worker worker) {
 		soc = fileServerSoc;
+		parent = worker;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -28,7 +31,23 @@ public class WorkerInputThread extends Thread {
 					//System.out.println("got something");
 					dictionary = (LinkedList<String>)dictionaryHolder;
 					System.out.println(dictionary.size());
-					Worker.dataReceivedSignal.countDown();
+					System.out.println("Hash: " + parent.Hash);
+					Iterator<String> iterator = dictionary.iterator();
+					while(iterator.hasNext()){
+						
+						String pswd = iterator.next(), pswdHash;
+						pswdHash = MD5Test.getHash(pswd);
+						
+						if(parent.Hash.equals(pswdHash)){
+							System.out.println(pswd);
+							break;
+						}
+						
+						
+					}
+					
+					
+
 					}
 				}
 
